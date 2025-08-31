@@ -1,0 +1,9 @@
+name: "Rust Fmt"
+description: "Check Rust code formatting"
+
+runs:
+    using: "composite"
+    steps:
+        - name: Run rustfmt
+          shell: bash
+          run: cargo fmt --all -- --check

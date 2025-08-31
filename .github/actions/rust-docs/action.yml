@@ -1,0 +1,9 @@
+name: "Rust Docs Check"
+description: "Build Rust documentation to ensure it compiles"
+
+runs:
+    using: "composite"
+    steps:
+        - name: Check docs
+          shell: bash
+          run: cargo doc --workspace --no-deps --all-features

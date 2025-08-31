@@ -1,0 +1,13 @@
+name: "Rust Audit"
+description: "Check for vulnerable dependencies"
+
+runs:
+    using: "composite"
+    steps:
+        - name: Install cargo-audit
+          shell: bash
+          run: cargo install cargo-audit --locked
+
+        - name: Run cargo audit
+          shell: bash
+          run: cargo audit

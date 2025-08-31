@@ -1,0 +1,122 @@
+name: "Dioxus Build & Release"
+description: "Build a Dioxus app across platforms and prepare artifacts for release"
+
+inputs:
+    toolchain:
+        description: "Rust toolchain"
+        required: false
+        default: "stable"
+
+    profile:
+        description: "Build profile (dev or release)"
+        required: false
+        default: "release"
+
+    platforms:
+        description: "Comma-separated list of platforms (web,desktop,mobile,android)"
+        required: false
+        default: "web"
+
+    os-matrix:
+        description: "Optional OS list; overrides auto-selection"
+        required: false
+        default: ""
+
+    release-tag:
+        description: "Optional GitHub release tag (if set, uploads artifacts to release)"
+        required: false
+        default: ""
+
+runs:
+    using: "composite"
+    steps:
+        - name: Compute OS matrix
+          id: compute-matrix
+          shell: bash
+          run: |
+              if [ -n "${{ inputs.os-matrix }}" ]; then
+                echo "oses=[\"$(echo '${{ inputs.os-matrix }}' | sed 's/,/","/g')\"]" >> $GITHUB_OUTPUT
+                exit 0
+              fi
+
+              oses="ubuntu-latest"
+              if [[ "${{ inputs.platforms }}" == *"desktop"* ]]; then
+                oses="ubuntu-latest,macos-latest,windows-latest"
+              fi
+              if [[ "${{ inputs.platforms }}" == *"mobile"* ]]; then
+                oses="$oses,macos-latest"
+              fi
+              if [[ "${{ inputs.platforms }}" == *"android"* ]]; then
+                oses="$oses,ubuntu-latest"
+              fi
+              echo "oses=[\"$(echo $oses | sed 's/,/","/g')\"]" >> $GITHUB_OUTPUT
+
+        - uses: actions/checkout@v4
+
+        - uses: nigeleke/github/.github/actions/rust-setup@v1
+          with:
+              toolchain: ${{ inputs.toolchain }}
+
+        - name: Install dioxus-cli
+          shell: bash
+          run: cargo install dioxus-cli --locked
+
+        - name: Install Android prerequisites
+          if: contains(inputs.platforms, 'android')
+          shell: bash
+          run: |
+              sudo apt-get update
+              sudo apt-get install -y openjdk-17-jdk unzip wget
+              wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O cmd-tools.zip
+              mkdir -p $HOME/android-sdk/cmdline-tools
+              unzip cmd-tools.zip -d $HOME/android-sdk/cmdline-tools
+              export ANDROID_HOME=$HOME/android-sdk
+              export PATH=$ANDROID_HOME/cmdline-tools/bin:$ANDROID_HOME/platform-tools:$PATH
+              yes | sdkmanager --licenses
+              sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.2.9519653"
+              rustup target add aarch64-linux-android armv7-linux-androideabi
+
+        - name: Build Dioxus app
+          shell: bash
+          run: |
+              set -eux
+              platforms="${{ inputs.platforms }}"
+              profile="${{ inputs.profile }}"
+              for p in $(echo $platforms | tr ',' ' '); do
+                echo "Building $p..."
+                if [ "$profile" = "release" ]; then
+                  dx build --release --platform $p || true
+                else
+                  dx build --platform $p || true
+                fi
+              done
+
+        - name: Package artifacts
+          shell: bash
+          run: |
+              mkdir -p artifacts
+              if [[ "${{ inputs.platforms }}" == *"web"* ]]; then
+                cd dist && zip -r ../artifacts/web.zip . && cd ..
+              fi
+              if [[ "${{ inputs.platforms }}" == *"desktop"* ]]; then
+                cd target/release && zip -r ../../artifacts/desktop.zip * && cd ../..
+              fi
+              if [[ "${{ inputs.platforms }}" == *"android"* ]]; then
+                cd target/android && zip -r ../../artifacts/android.zip * && cd ../..
+              fi
+
+        - name: Upload artifacts
+          uses: actions/upload-artifact@v4
+          with:
+              name: dioxus-builds
+              path: artifacts
+
+        - name: Create GitHub Release
+          if: ${{ inputs.release-tag != '' }}
+          uses: softprops/action-gh-release@v1
+          with:
+              tag_name: ${{ inputs.release-tag }}
+              name: ${{ inputs.release-tag }}
+              files: artifacts/*
+          env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

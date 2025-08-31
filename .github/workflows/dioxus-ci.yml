@@ -1,0 +1,66 @@
+name: Dioxus CI
+
+on:
+    workflow_call:
+        inputs:
+            release-tag:
+                required: false
+                type: string
+            platforms:
+                required: false
+                type: string
+                default: "web,desktop,android"
+            rust-toolchain:
+                required: false
+                type: string
+                default: "stable"
+            profile:
+                required: false
+                type: string
+                default: "release"
+
+jobs:
+    setup:
+        runs-on: ubuntu-latest
+        outputs:
+            os-matrix: ${{ steps.matrix.outputs.os-matrix }}
+        steps:
+            - id: matrix
+              uses: nigeleke/github/.github/actions/dioxus-build-release@v1
+              with:
+                  toolchain: ${{ inputs.rust-toolchain }}
+                  platforms: ${{ inputs.platforms }}
+                  profile: ${{ inputs.profile }}
+
+    checks:
+        needs: setup
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: nigeleke/github/.github/actions/rust-setup@v1
+              with:
+                  toolchain: ${{ inputs.rust-toolchain }}
+
+            - uses: nigeleke/github/.github/actions/rust-fmt@v1
+            - uses: nigeleke/github/.github/actions/rust-clippy@v1
+            - uses: nigeleke/github/.github/actions/rust-test-all-features@v1
+            - uses: nigeleke/github/.github/actions/rust-docs@v1
+            - uses: nigeleke/github/.github/actions/rust-audit@v1
+            - uses: nigeleke/github/.github/actions/rust-coverage@v1
+
+    build:
+        needs: [setup, checks]
+        strategy:
+            matrix:
+                os: ${{ fromJson(needs.setup.outputs.os-matrix) }}
+        runs-on: ${{ matrix.os }}
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: nigeleke/github/.github/actions/dioxus-build-release@v1
+              with:
+                  platforms: ${{ inputs.platforms }}
+                  profile: ${{ inputs.profile }}
+                  toolchain: ${{ inputs.rust-toolchain }}
+                  release-tag: ${{ inputs.release-tag }}

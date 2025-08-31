@@ -1,0 +1,9 @@
+name: "Rust Clippy"
+description: "Run Clippy lints with warnings as errors"
+
+runs:
+    using: "composite"
+    steps:
+        - name: Run Clippy
+          shell: bash
+          run: cargo clippy --workspace --all-targets --all-features -- -D warnings
