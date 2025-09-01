@@ -22,7 +22,7 @@ jobs:
                 os: [ubuntu-latest, windows-latest, macos-latest]
 
         steps:
-            - uses: nigeleke/github/.github/dioxus-setup@main
+            - uses: nigeleke/github/dioxus-setup@main
 
             - name: Bundle for desktop
               run: dx bundle --platform desktop --release
@@ -52,7 +52,7 @@ jobs:
         name: Build Web Bundle
         runs-on: ubuntu-latest
         steps:
-            - uses: nigeleke/github/.github/dioxus-setup@main
+            - uses: nigeleke/github/dioxus-setup@main
 
             - name: Bundle for web
               run: dx bundle --platform web --release
@@ -74,7 +74,7 @@ jobs:
         name: Build Android Bundle
         runs-on: ubuntu-latest
         steps:
-            - uses: nigeleke/github/.github/dioxus-setup@main
+            - uses: nigeleke/github/dioxus-setup@main
 
             - name: Add Android targets
               run: rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
@@ -117,7 +117,7 @@ jobs:
         name: Build iOS Bundle
         runs-on: macos-latest
         steps:
-            - uses: nigeleke/github/.github/dioxus-setup@main
+            - uses: nigeleke/github/dioxus-setup@main
 
             - name: Add iOS targets
               run: rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios

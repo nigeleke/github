@@ -10,7 +10,7 @@ inputs:
 runs:
     using: "composite"
     steps:
-        - uses: nigeleke/github/.github/actions/rust-setup@main
+        - uses: nigeleke/github/actions/rust-setup@main
           with:
               toolchain: ${{ inputs.toolchain }}
 
