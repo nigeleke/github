@@ -1,0 +1,138 @@
+name: Dioxus Bundle
+
+on:
+    workflow_call:
+        inputs:
+            platform:
+                description: "Platform to build (desktop, web, android, ios, or all)"
+                required: false
+                type: string
+                default: "all"
+
+permissions:
+    contents: write
+
+jobs:
+    build-desktop:
+        if: ${{ inputs.platform == 'all' || inputs.platform == 'desktop' }}
+        name: Build Desktop Bundle (${{ matrix.os }})
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                os: [ubuntu-latest, windows-latest, macos-latest]
+
+        steps:
+            - uses: nigeleke/github/.github/dioxus-setup@main
+
+            - name: Bundle for desktop
+              run: dx bundle --platform desktop --release
+
+            - name: Collect desktop bundles
+              shell: bash
+              run: |
+                  mkdir -p artifacts
+                  if [ "${{ runner.os }}" = "Linux" ]; then
+                    cp dist/bundle/desktop/*.{AppImage,deb,rpm} artifacts/ 2>/dev/null || true
+                  elif [ "${{ runner.os }}" = "Windows" ]; then
+                    cp dist/bundle/desktop/*.{msi,exe} artifacts/ 2>/dev/null || true
+                  elif [ "${{ runner.os }}" = "macOS" ]; then
+                    cp -R dist/bundle/desktop/*.app artifacts/ 2>/dev/null || true
+                    cp dist/bundle/desktop/*.dmg artifacts/ 2>/dev/null || true
+                  fi
+
+            - name: Upload artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: desktop-${{ runner.os }}
+                  path: artifacts/
+                  retention-days: 1
+
+    build-web:
+        if: ${{ inputs.platform == 'all' || inputs.platform == 'web' }}
+        name: Build Web Bundle
+        runs-on: ubuntu-latest
+        steps:
+            - uses: nigeleke/github/.github/dioxus-setup@main
+
+            - name: Bundle for web
+              run: dx bundle --platform web --release
+
+            - name: Collect web assets
+              run: |
+                  mkdir -p artifacts
+                  zip -r artifacts/web-bundle.zip public server
+
+            - name: Upload artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: web-bundle
+                  path: artifacts/
+                  retention-days: 1
+
+    build-android:
+        if: ${{ inputs.platform == 'all' || inputs.platform == 'android' }}
+        name: Build Android Bundle
+        runs-on: ubuntu-latest
+        steps:
+            - uses: nigeleke/github/.github/dioxus-setup@main
+
+            - name: Add Android targets
+              run: rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+
+            - name: Set up Java
+              uses: actions/setup-java@v4
+              with:
+                  distribution: "temurin"
+                  java-version: "17"
+
+            - name: Set up Android SDK and NDK
+              run: |
+                  wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+                  unzip commandlinetools-linux-11076708_latest.zip -d android-sdk
+                  mv android-sdk/cmdline-tools android-sdk/latest
+                  export ANDROID_HOME=$PWD/android-sdk
+                  echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+                  yes | $ANDROID_HOME/latest/bin/sdkmanager --licenses
+                  $ANDROID_HOME/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;26.1.10909125"
+                  export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125
+                  echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+
+            - name: Bundle for Android
+              run: dx bundle --platform android --release
+
+            - name: Collect APK
+              run: |
+                  mkdir -p artifacts
+                  cp dist/bundle/mobile/*.apk artifacts/ 2>/dev/null || true
+
+            - name: Upload artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: android-bundle
+                  path: artifacts/
+                  retention-days: 1
+
+    build-ios:
+        if: ${{ inputs.platform == 'all' || inputs.platform == 'ios' }}
+        name: Build iOS Bundle
+        runs-on: macos-latest
+        steps:
+            - uses: nigeleke/github/.github/dioxus-setup@main
+
+            - name: Add iOS targets
+              run: rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios
+
+            - name: Bundle for iOS
+              run: dx bundle --platform ios --release
+
+            - name: Collect IPA
+              run: |
+                  mkdir -p artifacts
+                  cp dist/bundle/mobile/*.ipa artifacts/ 2>/dev/null || true
+
+            - name: Upload artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ios-bundle
+                  path: artifacts/
+                  retention-days: 1
