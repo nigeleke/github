@@ -23,15 +23,15 @@ jobs:
 
         steps:
             - name: Run prerequisites for Ubuntu
-              if: ${{ matrix.os == 'ubuntu-latest' }}
+              if: ${{ matrix.os }} == 'ubuntu-latest'
               uses: nigeleke/github/.github/actions/prerequisites-ubuntu-latest@main
 
             - name: Run prerequisites for Windows
-              if: ${{ matrix.os == 'windows-latest' }}
+              if: ${{ matrix.os }} == 'windows-latest'
               uses: nigeleke/github/.github/actions/prerequisites-windows-latest@main
 
             - name: Run prerequisites for MacOs
-              if: ${{ matrix.os == 'macos-latest' }}
+              if: ${{ matrix.os }} == 'macos-latest'
               uses: nigeleke/github/.github/actions/prerequisites-macos-latest@main
 
             - uses: nigeleke/github/.github/actions/dioxus-setup@main
