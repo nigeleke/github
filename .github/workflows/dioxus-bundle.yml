@@ -22,6 +22,8 @@ jobs:
                 os: [ubuntu-latest, windows-latest, macos-latest]
 
         steps:
+            - uses: nigeleke/github/.github/actions/prerequisites-${{matrix.os}}
+
             - uses: nigeleke/github/.github/actions/dioxus-setup@main
 
             - name: Bundle for desktop
@@ -52,6 +54,8 @@ jobs:
         name: Build Web Bundle
         runs-on: ubuntu-latest
         steps:
+            - uses: nigeleke/github/.github/actions/prerequisites-ubuntu-latest
+
             - uses: nigeleke/github/.github/actions/dioxus-setup@main
 
             - name: Bundle for web
@@ -74,6 +78,8 @@ jobs:
         name: Build Android Bundle
         runs-on: ubuntu-latest
         steps:
+            - uses: nigeleke/github/.github/actions/prerequisites-ubuntu-latest
+
             - uses: nigeleke/github/.github/actions/dioxus-setup@main
 
             - name: Add Android targets
@@ -117,6 +123,8 @@ jobs:
         name: Build iOS Bundle
         runs-on: macos-latest
         steps:
+            - uses: nigeleke/github/.github/actions/prerequisites-macos-latest
+
             - uses: nigeleke/github/.github/actions/dioxus-setup@main
 
             - name: Add iOS targets
