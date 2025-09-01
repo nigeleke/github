@@ -26,7 +26,7 @@ jobs:
             os-matrix: ${{ steps.matrix.outputs.os-matrix }}
         steps:
             - id: matrix
-              uses: nigeleke/github/.github/actions/dioxus-build-release@v1
+              uses: nigeleke/github/.github/actions/dioxus-build-release@main
               with:
                   toolchain: ${{ inputs.rust-toolchain }}
                   platforms: ${{ inputs.platforms }}
@@ -38,16 +38,16 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - uses: nigeleke/github/.github/actions/rust-setup@v1
+            - uses: nigeleke/github/.github/actions/rust-setup@main
               with:
                   toolchain: ${{ inputs.rust-toolchain }}
 
-            - uses: nigeleke/github/.github/actions/rust-fmt@v1
-            - uses: nigeleke/github/.github/actions/rust-clippy@v1
-            - uses: nigeleke/github/.github/actions/rust-test-all-features@v1
-            - uses: nigeleke/github/.github/actions/rust-docs@v1
-            - uses: nigeleke/github/.github/actions/rust-audit@v1
-            - uses: nigeleke/github/.github/actions/rust-coverage@v1
+            - uses: nigeleke/github/.github/actions/rust-fmt@main
+            - uses: nigeleke/github/.github/actions/rust-clippy@main
+            - uses: nigeleke/github/.github/actions/rust-test-all-features@main
+            - uses: nigeleke/github/.github/actions/rust-docs@main
+            - uses: nigeleke/github/.github/actions/rust-audit@main
+            - uses: nigeleke/github/.github/actions/rust-coverage@main
 
     build:
         needs: [setup, checks]
@@ -58,7 +58,7 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - uses: nigeleke/github/.github/actions/dioxus-build-release@v1
+            - uses: nigeleke/github/.github/actions/dioxus-build-release@main
               with:
                   platforms: ${{ inputs.platforms }}
                   profile: ${{ inputs.profile }}

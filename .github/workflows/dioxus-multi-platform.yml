@@ -12,7 +12,7 @@ jobs:
             os-matrix: ${{ steps.matrix.outputs.os-matrix }}
         steps:
             - id: matrix
-              uses: nigeleke/github/.github/actions/dioxus-build-release@v1
+              uses: nigeleke/github/.github/actions/dioxus-build-release@main
               with:
                   platforms: web,desktop,android
                   profile: release
@@ -25,7 +25,7 @@ jobs:
         runs-on: ${{ matrix.os }}
         steps:
             - uses: actions/checkout@v4
-            - uses: nigeleke/github/.github/actions/dioxus-build-release@v1
+            - uses: nigeleke/github/.github/actions/dioxus-build-release@main
               with:
                   platforms: web,desktop,android
                   profile: release

@@ -1,21 +1,23 @@
-name: "Rust Setup"
-description: "Install Rust toolchain and enable cargo caching"
+name: "Dioxus Setup"
+description: "Install Dioxus toolchain and cache"
 
 inputs:
     toolchain:
         description: "Rust toolchain"
         required: false
-        default: "stable"
+        default: "nightly"
 
 runs:
     using: "composite"
     steps:
-        - uses: actions/checkout@v4
-
-        - name: Install Rust
-          uses: dtolnay/rust-toolchain@master
+        - uses: nigeleke/github/.github/actions/rust-setup@main
           with:
               toolchain: ${{ inputs.toolchain }}
+
+        - name: Install Dioxus
+          shell: bash
+          run: |
+              cargo install dioxus-cli --locked
 
         - name: Cache cargo builds
           uses: Swatinem/rust-cache@v2
