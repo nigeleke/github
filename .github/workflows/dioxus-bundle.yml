@@ -64,7 +64,7 @@ jobs:
         name: Build Web Bundle
         runs-on: ubuntu-latest
         steps:
-            - uses: nigeleke/github/.github/actions/prerequisites-ubuntu-latest
+            - uses: nigeleke/github/.github/actions/prerequisites-ubuntu-latest@main
 
             - uses: nigeleke/github/.github/actions/dioxus-setup@main
 
@@ -88,7 +88,7 @@ jobs:
         name: Build Android Bundle
         runs-on: ubuntu-latest
         steps:
-            - uses: nigeleke/github/.github/actions/prerequisites-ubuntu-latest
+            - uses: nigeleke/github/.github/actions/prerequisites-ubuntu-latest@main
 
             - uses: nigeleke/github/.github/actions/dioxus-setup@main
 
@@ -133,7 +133,7 @@ jobs:
         name: Build iOS Bundle
         runs-on: macos-latest
         steps:
-            - uses: nigeleke/github/.github/actions/prerequisites-macos-latest
+            - uses: nigeleke/github/.github/actions/prerequisites-macos-latest@main
 
             - uses: nigeleke/github/.github/actions/dioxus-setup@main
 
