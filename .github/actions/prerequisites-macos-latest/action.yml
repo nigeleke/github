@@ -1,9 +1,0 @@
-name: "Prerequisites MacOs"
-description: "Install prerequisites for MacOs dev environment"
-
-runs:
-    using: "composite"
-    steps:
-        - name: Install Prerequisites
-          shell: bash
-          run: echo "TODO"

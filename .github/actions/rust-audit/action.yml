@@ -1,5 +1,5 @@
 name: "Rust Audit"
-description: "Check for vulnerable dependencies"
+description: "Check for dependencies"
 
 runs:
     using: "composite"

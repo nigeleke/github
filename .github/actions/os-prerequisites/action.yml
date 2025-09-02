@@ -1,0 +1,43 @@
+name: "Dev OS Prerequisites"
+description: "Install prerequisites for dev environment"
+
+inputs:
+    os:
+        description: "Operating System"
+        required: true
+
+runs:
+    using: "composite"
+    steps:
+        - name: Validate input
+          shell: bash
+          run: |
+              case "${{ inputs.os }}" in
+                macos-latest|ubuntu-latest|windows-latest) echo "OS: ${{ inputs.os }}" ;;
+                *) echo "Invalid OS: ${{ inputs.os }}" && exit 1 ;;
+              esac
+
+        - name: Install MacOs Prerequisites
+          if: ${{ inputs.os == 'macos-latest' }}
+          shell: bash
+          run: echo "TODO"
+
+        - name: Install Ubuntu Prerequisites
+          if: ${{ inputs.os == 'ubuntu-latest' }}
+          shell: bash
+          run: |
+              sudo apt update
+              sudo apt install libwebkit2gtk-4.1-dev \
+                build-essential \
+                curl \
+                wget \
+                file \
+                libxdo-dev \
+                libssl-dev \
+                libayatana-appindicator3-dev \
+                librsvg2-dev
+
+        - name: Install Windows Prerequisites
+          if: ${{ inputs.os == 'windows-latest' }}
+          shell: bash
+          run: echo "TODO"
