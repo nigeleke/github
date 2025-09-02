@@ -15,7 +15,7 @@ permissions:
 jobs:
     build-desktop:
         if: ${{ inputs.platform == 'all' || inputs.platform == 'desktop' }}
-        name: Build Desktop Bundle (${{ matrix.os }})
+        name: Desktop (${{ matrix.os }})
         runs-on: ${{ matrix.os }}
         strategy:
             matrix:
@@ -36,12 +36,15 @@ jobs:
               run: |
                   mkdir -p artifacts
                   if [ "${{ runner.os }}" = "Linux" ]; then
-                    cp dist/bundle/desktop/*.{AppImage,deb,rpm} artifacts/ 2>/dev/null || true
+                    cp target/dx/lingora/bundle/linux/bundle/deb/Lingora_0.1.49_amd64.deb artifacts/ 2>/dev/null || true
+                    cp target/dx/lingora/bundle/linux/bundle/rpm/Lingora-0.1.49-.x86_64.rpm artifacts/ 2>/dev/null || true
+                    cp target/dx/lingora/bundle/linux/bundle/appimage/Lingora_0.1.49_amd64.AppImage artifacts/ 2>/dev/null || true
                   elif [ "${{ runner.os }}" = "Windows" ]; then
-                    cp dist/bundle/desktop/*.{msi,exe} artifacts/ 2>/dev/null || true
+                    cp target\dx\lingora\bundle\windows\bundle/msi/Lingora_0.1.49_x64_en-US.msi artifacts/ 2>/dev/null || true
+                    cp target\dx\lingora\bundle\windows\bundle/nsis/Lingora_0.1.49_x64-setup.exe artifacts/ 2>/dev/null || true
                   elif [ "${{ runner.os }}" = "macOS" ]; then
-                    cp -R dist/bundle/desktop/*.app artifacts/ 2>/dev/null || true
-                    cp dist/bundle/desktop/*.dmg artifacts/ 2>/dev/null || true
+                    cp target/dx/lingora/bundle/macos/bundle/macos/Lingora.app artifacts/ 2>/dev/null || true
+                    cp target/dx/lingora/bundle/macos/bundle/dmg/Lingora_0.1.49_aarch64.dmg artifacts/ 2>/dev/null || true
                   fi
 
             - name: Upload artifact

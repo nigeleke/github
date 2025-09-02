@@ -1,0 +1,24 @@
+name: Rust QA
+
+on:
+    workflow_call:
+        inputs:
+            toolchain:
+                description: "Rust toolchain"
+                required: false
+                type: string
+                default: "stable"
+
+jobs:
+    qa:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: nigeleke/github/.github/actions/os-prerequisites@main
+              with:
+                  os: ubuntu-latest
+
+            - uses: nigeleke/github/.github/actions/rust-setup@main
+              with:
+                  toolchain: ${{ inputs.toolchain }}
+
+            - uses: nigeleke/github/.github/actions/rust-qa@main

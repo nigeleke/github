@@ -1,0 +1,12 @@
+name: "Rust QA"
+description: "Run QA checks against rust code"
+
+runs:
+    using: "composite"
+    steps:
+        - uses: nigeleke/github/.github/actions/rust-test-all-features@main
+        - uses: nigeleke/github/.github/actions/rust-llvm-cov@main
+        - uses: nigeleke/github/.github/actions/rust-clippy@main
+        - uses: nigeleke/github/.github/actions/rust-fmt@main
+        - uses: nigeleke/github/.github/actions/rust-docs@main
+        - uses: nigeleke/github/.github/actions/rust-audit@main
