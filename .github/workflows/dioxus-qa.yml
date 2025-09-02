@@ -32,7 +32,7 @@ jobs:
               with:
                   toolchain: nightly
 
-            - uses: nigekeke/github/.github/actions/rust-qa@main
+            - uses: nigeleke/github/.github/actions/rust-qa@main
 
     web-qa:
         if: ${{ inputs.platform == 'all' || inputs.platform == 'web' }}
@@ -47,7 +47,7 @@ jobs:
               with:
                   toolchain: ${{ inputs.toolchain }}
 
-            - uses: nigekeke/github/.github/actions/rust-qa@main
+            - uses: nigeleke/github/.github/actions/rust-qa@main
 
     android-qa:
         if: ${{ inputs.platform == 'all' || inputs.platform == 'android' }}
@@ -83,7 +83,7 @@ jobs:
                   export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125
                   echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
 
-            - uses: nigekeke/github/.github/actions/rust-qa@main
+            - uses: nigeleke/github/.github/actions/rust-qa@main
 
     ios-qa:
         if: ${{ inputs.platform == 'all' || inputs.platform == 'ios' }}
@@ -101,4 +101,4 @@ jobs:
             - name: Add iOS targets
               run: rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios
 
-            - uses: nigekeke/github/.github/actions/rust-qa@main
+            - uses: nigeleke/github/.github/actions/rust-qa@main
