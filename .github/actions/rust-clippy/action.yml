@@ -6,4 +6,6 @@ runs:
     steps:
         - name: Run Clippy
           shell: bash
-          run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+          run: |
+              rustup component add clippy
+              cargo clippy --workspace --all-targets --all-features -- -D warnings
