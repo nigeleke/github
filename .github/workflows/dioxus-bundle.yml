@@ -70,8 +70,11 @@ jobs:
 
             - name: Collect web assets
               run: |
+                  ls target/dx/scopa/release
+                  ls target/dx/scopa/release/web
+                  ls target/dx/scopa/release/web/public
                   mkdir -p artifacts
-                  zip -r artifacts/web-bundle.zip public server
+                  zip -r artifacts/web-bundle.zip target/dx/scopa/release/web/public
 
             - name: Upload artifact
               uses: actions/upload-artifact@v4
