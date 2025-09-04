@@ -6,4 +6,6 @@ runs:
     steps:
         - name: Run rustfmt
           shell: bash
-          run: cargo fmt --all -- --check
+          run: |
+              rustup component add rustfmt
+              cargo fmt --all -- --check
