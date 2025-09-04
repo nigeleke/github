@@ -1,5 +1,5 @@
 name: "Dioxus Setup"
-description: "Install Dioxus toolchain and cache"
+description: "Install Dioxus toolchain"
 
 inputs:
     toolchain:
@@ -19,8 +19,3 @@ runs:
           run: |
               cargo install cargo-binstall
               cargo binstall dioxus-cli
-
-        - name: Cache cargo builds
-          uses: Swatinem/rust-cache@v2
-          with:
-              cache-all-crates: true
