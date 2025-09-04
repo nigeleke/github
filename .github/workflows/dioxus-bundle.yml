@@ -34,20 +34,17 @@ jobs:
             - name: Collect desktop bundles
               shell: bash
               run: |
-                  echo "**** +"
-                  echo $CARGO_PKG_NAME
-                  echo "**** -"
                   mkdir -p artifacts
                   if [ "${{ runner.os }}" = "Linux" ]; then
-                    cp target/dx/$CARGO_PKG_NAME/bundle/linux/bundle/deb/*.deb artifacts/ 2>/dev/null || true
-                    cp target/dx/$CARGO_PKG_NAME/bundle/linux/bundle/rpm/*.rpm artifacts/ 2>/dev/null || true
-                    cp target/dx/$CARGO_PKG_NAME/bundle/linux/bundle/appimage/*.AppImage artifacts/ 2>/dev/null || true
+                    cp target/dx/*/bundle/linux/bundle/deb/*.deb artifacts/ 2>/dev/null || true
+                    cp target/dx/*/bundle/linux/bundle/rpm/*.rpm artifacts/ 2>/dev/null || true
+                    cp target/dx/*/bundle/linux/bundle/appimage/*.AppImage artifacts/ 2>/dev/null || true
                   elif [ "${{ runner.os }}" = "Windows" ]; then
-                    cp target\dx\$CARGO_PKG_NAME\bundle\windows\bundle/msi/*.msi artifacts/ 2>/dev/null || true
-                    cp target\dx\$CARGO_PKG_NAME\bundle\windows\bundle/nsis/*.exe artifacts/ 2>/dev/null || true
+                    cp target\dx\*\bundle\windows\bundle/msi/*.msi artifacts/ 2>/dev/null || true
+                    cp target\dx\*\bundle\windows\bundle/nsis/*.exe artifacts/ 2>/dev/null || true
                   elif [ "${{ runner.os }}" = "macOS" ]; then
-                    cp target/dx/$CARGO_PKG_NAME/bundle/macos/bundle/macos/*.app artifacts/ 2>/dev/null || true
-                    cp target/dx/$CARGO_PKG_NAME/bundle/macos/bundle/dmg/*.dmg artifacts/ 2>/dev/null || true
+                    cp target/dx/*/bundle/macos/bundle/macos/*.app artifacts/ 2>/dev/null || true
+                    cp target/dx/*/bundle/macos/bundle/dmg/*.dmg artifacts/ 2>/dev/null || true
                   fi
 
             - name: Upload artifact
@@ -73,14 +70,8 @@ jobs:
 
             - name: Collect web assets
               run: |
-                  ls target/dx/scopa/release
-                  ls target/dx/scopa/release/web
-                  ls target/dx/scopa/release/web/public
-                  echo "**** +"
-                  echo $CARGO_PKG_NAME
-                  echo "**** -"
                   mkdir -p artifacts
-                  zip -r artifacts/web-bundle.zip target/dx/$CARGO_PKG_NAME/release/web/public
+                  zip -r artifacts/web-bundle.zip target/dx/*/release/web/public
 
             - name: Upload artifact
               uses: actions/upload-artifact@v4
