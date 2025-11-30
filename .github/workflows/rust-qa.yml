@@ -12,6 +12,7 @@ on:
 jobs:
     qa:
         runs-on: ubuntu-latest
+        env: ${{ inputs }}
         steps:
             - uses: nigeleke/github/.github/actions/os-prerequisites@main
               with:
