@@ -13,13 +13,18 @@ on:
                 required: false
                 type: string
                 default: "all"
+            env:
+                description: 'JSON object of environment variables to set (e.g. { "DATABASE_URL": "..." })'
+                required: false
+                type: string
+                default: "{}"
 
 jobs:
     desktop-qa:
         if: ${{ inputs.platform == 'all' || inputs.platform == 'desktop' }}
         name: Desktop QA (${{ matrix.os }})
         runs-on: ${{ matrix.os }}
-        env: ${{ inputs }}
+        env: ${{ fromJSON(needs.setup-env.outputs.env-json) }}
         strategy:
             matrix:
                 os: [ubuntu-latest, windows-latest, macos-latest]
@@ -39,7 +44,7 @@ jobs:
         if: ${{ inputs.platform == 'all' || inputs.platform == 'web' }}
         name: Web QA
         runs-on: ubuntu-latest
-        env: ${{ inputs }}
+        env: ${{ fromJSON(needs.setup-env.outputs.env-json) }}
         steps:
             - uses: nigeleke/github/.github/actions/os-prerequisites@main
               with:
@@ -55,7 +60,7 @@ jobs:
         if: ${{ inputs.platform == 'all' || inputs.platform == 'android' }}
         name: Android QA
         runs-on: ubuntu-latest
-        env: ${{ inputs }}
+        env: ${{ fromJSON(needs.setup-env.outputs.env-json) }}
         steps:
             - uses: nigeleke/github/.github/actions/os-prerequisites@main
               with:
@@ -92,7 +97,7 @@ jobs:
         if: ${{ inputs.platform == 'all' || inputs.platform == 'ios' }}
         name: iOS QA
         runs-on: macos-latest
-        env: ${{ inputs }}
+        env: ${{ fromJSON(needs.setup-env.outputs.env-json) }}
         steps:
             - uses: nigeleke/github/.github/actions/os-prerequisites@main
               with:
