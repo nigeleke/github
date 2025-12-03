@@ -1,125 +1,149 @@
 name: Dioxus QA
 
 on:
-    workflow_call:
-        inputs:
-            toolchain:
-                description: "Rust toolchain"
-                required: false
-                type: string
-                default: "nightly"
-            platform:
-                description: "Platform to QA (desktop, web, android, ios, or all)"
-                required: false
-                type: string
-                default: "all"
-            env:
-                description: 'JSON object of environment variables to set (e.g. { "DATABASE_URL": "..." })'
-                required: false
-                type: string
-                default: "{}"
+  workflow_call:
+    inputs:
+      toolchain:
+        description: "Rust toolchain"
+        required: false
+        type: string
+        default: "nightly"
+      platform:
+        description: "Platform to QA (desktop, web, android, ios, or all)"
+        required: false
+        type: string
+        default: "all"
+      env:
+        description: 'JSON object of environment variables to set (e.g. { "DATABASE_URL": "..." })'
+        required: false
+        type: string
+        default: "{}"
 
 jobs:
-    setup-env:
-        runs-on: ubuntu-latest
-        outputs:
-            env-json: ${{ steps.parse.outputs.env }}
-        steps:
-            - name: Parse env input
-              id: parse
-              run: |
-                  # Safely parse the JSON input and re-output it as a JSON string
-                  ENV_JSON='${{ inputs.env }}'
-                  echo "env=$ENV_JSON" >> $GITHUB_OUTPUT
+  setup-env:
+    runs-on: ubuntu-latest
+    outputs:
+      env-json: ${{ steps.parse.outputs.env }}
+    steps:
+      - name: Parse env input
+        id: parse
+        shell: bash
+        run: |
+          # Parse JSON input as literal string
+          ENV_JSON="${{ inputs.env }}"
+          echo "env=$ENV_JSON" >> "$GITHUB_OUTPUT"
 
-    desktop-qa:
-        if: ${{ inputs.platform == 'all' || inputs.platform == 'desktop' }}
-        name: Desktop QA (${{ matrix.os }})
-        runs-on: ${{ matrix.os }}
-        env: ${{ fromJSON(needs.setup-env.outputs.env-json) }}
-        strategy:
-            matrix:
-                os: [ubuntu-latest, windows-latest, macos-latest]
+  desktop-qa:
+    needs: setup-env
+    if: ${{ inputs.platform == 'all' || inputs.platform == 'desktop' }}
+    name: Desktop QA (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    env: ${{ fromJSON(needs.setup-env.outputs.env-json) }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
-        steps:
-            - uses: nigeleke/github/.github/actions/os-prerequisites@main
-              with:
-                  os: ${{ matrix.os }}
+    steps:
+      - uses: nigeleke/github/.github/actions/os-prerequisites@main
+        with:
+          os: ${{ matrix.os }}
 
-            - uses: nigeleke/github/.github/actions/dioxus-setup@main
-              with:
-                  toolchain: nightly
+      - uses: nigeleke/github/.github/actions/dioxus-setup@main
+        with:
+          toolchain: ${{ inputs.toolchain }}
 
-            - uses: nigeleke/github/.github/actions/rust-qa@main
+      - uses: nigeleke/github/.github/actions/rust-qa@main
 
-    web-qa:
-        if: ${{ inputs.platform == 'all' || inputs.platform == 'web' }}
-        name: Web QA
-        runs-on: ubuntu-latest
-        env: ${{ fromJSON(needs.setup-env.outputs.env-json) }}
-        steps:
-            - uses: nigeleke/github/.github/actions/os-prerequisites@main
-              with:
-                  os: ubuntu-latest
+  web-qa:
+    needs: setup-env
+    if: ${{ inputs.platform == 'all' || inputs.platform == 'web' }}
+    name: Web QA
+    runs-on: ubuntu-latest
+    env: ${{ fromJSON(needs.setup-env.outputs.env-json) }}
 
-            - uses: nigeleke/github/.github/actions/dioxus-setup@main
-              with:
-                  toolchain: ${{ inputs.toolchain }}
+    steps:
+      - uses: nigeleke/github/.github/actions/os-prerequisites@main
+        with:
+          os: ubuntu-latest
 
-            - uses: nigeleke/github/.github/actions/rust-qa@main
+      - uses: nigeleke/github/.github/actions/dioxus-setup@main
+        with:
+          toolchain: ${{ inputs.toolchain }}
 
-    android-qa:
-        if: ${{ inputs.platform == 'all' || inputs.platform == 'android' }}
-        name: Android QA
-        runs-on: ubuntu-latest
-        env: ${{ fromJSON(needs.setup-env.outputs.env-json) }}
-        steps:
-            - uses: nigeleke/github/.github/actions/os-prerequisites@main
-              with:
-                  os: ubuntu-latest
+      - uses: nigeleke/github/.github/actions/rust-qa@main
 
-            - uses: nigeleke/github/.github/actions/dioxus-setup@main
-              with:
-                  toolchain: ${{ inputs.toolchain }}
+  android-qa:
+    needs: setup-env
+    if: ${{ inputs.platform == 'all' || inputs.platform == 'android' }}
+    name: Android QA
+    runs-on: ubuntu-latest
+    env: ${{ fromJSON(needs.setup-env.outputs.env-json) }}
 
-            - name: Add Android targets
-              run: rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+    steps:
+      - uses: nigeleke/github/.github/actions/os-prerequisites@main
+        with:
+          os: ubuntu-latest
 
-            - name: Set up Java
-              uses: actions/setup-java@v4
-              with:
-                  distribution: "temurin"
-                  java-version: "17"
+      - uses: nigeleke/github/.github/actions/dioxus-setup@main
+        with:
+          toolchain: ${{ inputs.toolchain }}
 
-            - name: Set up Android SDK and NDK
-              run: |
-                  wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-                  unzip commandlinetools-linux-11076708_latest.zip -d android-sdk
-                  mv android-sdk/cmdline-tools android-sdk/latest
-                  export ANDROID_HOME=$PWD/android-sdk
-                  echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-                  yes | $ANDROID_HOME/latest/bin/sdkmanager --licenses
-                  $ANDROID_HOME/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;26.1.10909125"
-                  export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125
-                  echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+      - name: Add Android targets
+        run: |
+          rustup target add \
+            aarch64-linux-android \
+            armv7-linux-androideabi \
+            i686-linux-android \
+            x86_64-linux-android
 
-            - uses: nigeleke/github/.github/actions/rust-qa@main
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
 
-    ios-qa:
-        if: ${{ inputs.platform == 'all' || inputs.platform == 'ios' }}
-        name: iOS QA
-        runs-on: macos-latest
-        env: ${{ fromJSON(needs.setup-env.outputs.env-json) }}
-        steps:
-            - uses: nigeleke/github/.github/actions/os-prerequisites@main
-              with:
-                  os: macos-latest
+      - name: Set up Android SDK and NDK
+        shell: bash
+        run: |
+          wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip commandlinetools-linux-11076708_latest.zip -d android-sdk
+          mkdir -p android-sdk/cmdline-tools
+          mv android-sdk/cmdline-tools android-sdk/cmdline-tools/latest
 
-            - uses: nigeleke/github/.github/actions/dioxus-setup@main
-              with:
-                  toolchain: ${{ inputs.toolchain }}
+          export ANDROID_HOME="$PWD/android-sdk"
+          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
 
-            - name: Add iOS targets
-              run: rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+            "platform-tools" \
+            "platforms;android-34" \
+            "build-tools;34.0.0" \
+            "ndk;26.1.10909125"
 
-            - uses: nigeleke/github/.github/actions/rust-qa@main
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125" >> "$GITHUB_ENV"
+
+      - uses: nigeleke/github/.github/actions/rust-qa@main
+
+  ios-qa:
+    needs: setup-env
+    if: ${{ inputs.platform == 'all' || inputs.platform == 'ios' }}
+    name: iOS QA
+    runs-on: macos-latest
+    env: ${{ fromJSON(needs.setup-env.outputs.env-json) }}
+
+    steps:
+      - uses: nigeleke/github/.github/actions/os-prerequisites@main
+        with:
+          os: macos-latest
+
+      - uses: nigeleke/github/.github/actions/dioxus-setup@main
+        with:
+          toolchain: ${{ inputs.toolchain }}
+
+      - name: Add iOS targets
+        run: |
+          rustup target add \
+            aarch64-apple-ios \
+            aarch64-apple-ios-sim
+
+      - uses: nigeleke/github/.github/actions/rust-qa@main
