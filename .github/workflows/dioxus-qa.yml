@@ -20,6 +20,18 @@ on:
                 default: "{}"
 
 jobs:
+    setup-env:
+        runs-on: ubuntu-latest
+        outputs:
+            env-json: ${{ steps.parse.outputs.env }}
+        steps:
+            - name: Parse env input
+              id: parse
+              run: |
+                  # Safely parse the JSON input and re-output it as a JSON string
+                  ENV_JSON='${{ inputs.env }}'
+                  echo "env=$ENV_JSON" >> $GITHUB_OUTPUT
+
     desktop-qa:
         if: ${{ inputs.platform == 'all' || inputs.platform == 'desktop' }}
         name: Desktop QA (${{ matrix.os }})
