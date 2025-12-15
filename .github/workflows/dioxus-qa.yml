@@ -76,7 +76,7 @@ jobs:
             - name: Set up Java
               uses: actions/setup-java@v4
               with:
-                  distribution: "temurin"
+                  distribution: temurin
                   java-version: "17"
 
             - name: Set up Android SDK and NDK
@@ -87,9 +87,12 @@ jobs:
                   export ANDROID_HOME=$PWD/android-sdk
                   echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
                   yes | $ANDROID_HOME/latest/bin/sdkmanager --licenses
-                  $ANDROID_HOME/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;26.1.10909125"
-                  export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125
-                  echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+                  $ANDROID_HOME/latest/bin/sdkmanager \
+                    "platform-tools" \
+                    "platforms;android-34" \
+                    "build-tools;34.0.0" \
+                    "ndk;26.1.10909125"
+                  echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125" >> $GITHUB_ENV
 
             - uses: nigeleke/github/.github/actions/rust-qa@main
 
