@@ -8,11 +8,17 @@ on:
                 required: false
                 type: string
                 default: "stable"
+            env:
+                description: "JSON object of environment variables to set"
+                required: false
+                type: string
+                default: "{}"
 
 jobs:
     qa:
         runs-on: ubuntu-latest
-        env: ${{ inputs }}
+        env: ${{ fromJSON(inputs.env) }}
+
         steps:
             - uses: nigeleke/github/.github/actions/os-prerequisites@main
               with:

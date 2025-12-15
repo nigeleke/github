@@ -20,23 +20,11 @@ on:
                 default: "{}"
 
 jobs:
-    setup-env:
-        runs-on: ubuntu-latest
-        outputs:
-            env-json: ${{ steps.parse.outputs.env }}
-        steps:
-            - name: Parse env input
-              id: parse
-              run: |
-                  # Safely parse the JSON input and re-output it as a JSON string
-                  ENV_JSON='${{ inputs.env }}'
-                  echo "env=$ENV_JSON" >> $GITHUB_OUTPUT
-
     desktop-qa:
         if: ${{ inputs.platform == 'all' || inputs.platform == 'desktop' }}
         name: Desktop QA (${{ matrix.os }})
         runs-on: ${{ matrix.os }}
-        env: ${{ fromJSON(needs.setup-env.outputs.env-json) }}
+        env: ${{ fromJSON(inputs.env) }}
         strategy:
             matrix:
                 os: [ubuntu-latest, windows-latest, macos-latest]
@@ -48,7 +36,7 @@ jobs:
 
             - uses: nigeleke/github/.github/actions/dioxus-setup@main
               with:
-                  toolchain: nightly
+                  toolchain: ${{ inputs.toolchain }}
 
             - uses: nigeleke/github/.github/actions/rust-qa@main
 
@@ -56,7 +44,7 @@ jobs:
         if: ${{ inputs.platform == 'all' || inputs.platform == 'web' }}
         name: Web QA
         runs-on: ubuntu-latest
-        env: ${{ fromJSON(needs.setup-env.outputs.env-json) }}
+        env: ${{ fromJSON(inputs.env) }}
         steps:
             - uses: nigeleke/github/.github/actions/os-prerequisites@main
               with:
@@ -72,7 +60,7 @@ jobs:
         if: ${{ inputs.platform == 'all' || inputs.platform == 'android' }}
         name: Android QA
         runs-on: ubuntu-latest
-        env: ${{ fromJSON(needs.setup-env.outputs.env-json) }}
+        env: ${{ fromJSON(inputs.env) }}
         steps:
             - uses: nigeleke/github/.github/actions/os-prerequisites@main
               with:
@@ -109,7 +97,7 @@ jobs:
         if: ${{ inputs.platform == 'all' || inputs.platform == 'ios' }}
         name: iOS QA
         runs-on: macos-latest
-        env: ${{ fromJSON(needs.setup-env.outputs.env-json) }}
+        env: ${{ fromJSON(inputs.env) }}
         steps:
             - uses: nigeleke/github/.github/actions/os-prerequisites@main
               with:
