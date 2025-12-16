@@ -46,6 +46,9 @@ jobs:
         runs-on: ubuntu-latest
         env: ${{ fromJSON(inputs.env) }}
         steps:
+            - name: Show env
+              run: env
+
             - uses: nigeleke/github/.github/actions/os-prerequisites@main
               with:
                   os: ubuntu-latest
