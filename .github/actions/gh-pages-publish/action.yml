@@ -22,10 +22,21 @@ runs:
           run: |
               git config --global user.email "nigeleke@users.noreply.github.com"
               git config --global user.name "Nigel Eke"
-              export VERSION=$(git describe --abbrev=0 --tags)
-              git checkout gh-pages
+
+              VERSION=$(git describe --abbrev=0 --tags 2>/dev/null || echo "dev")
+
+              git fetch origin gh-pages || true
+
+              if git show-ref --quiet refs/heads/gh-pages; then
+                git checkout gh-pages
+              else
+                git checkout --orphan gh-pages
+                git rm -rf .
+              fi
+
               rm -rf docs
               mv docs0 docs
+
               git add .
-              git commit -m "Release $VERSION"
-              git push
+              git commit -m "Release $VERSION" || echo "No changes"
+              git push origin gh-pages
