@@ -1,0 +1,31 @@
+name: Dioxus Bundle
+description: Run dx bundle with opionated workspace / package mapping.
+
+inputs:
+    platform:
+        required: true
+        description: Target platform (desktop, web, android, ios)
+
+runs:
+    using: composite
+    steps:
+        - shell: bash
+          run: |
+              DX_CMD="dx bundle --platform ${{ inputs.platform }} --release"
+
+              PKG=""
+
+              if grep -q '^\[workspace\]' Cargo.toml; then
+                  case "${{ inputs.platform }}" in
+                      web)           PKG=web ;;
+                      desktop)       PKG=desktop ;;
+                      android|ios)   PKG=mobile ;;
+                  esac
+              fi
+
+              if [ -n "$PKG" ]; then
+                  DX_CMD="$DX_CMD --package $PKG"
+              fi
+
+              echo "Running: $DX_CMD"
+              eval "$DX_CMD"

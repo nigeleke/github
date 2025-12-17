@@ -28,8 +28,9 @@ jobs:
 
             - uses: nigeleke/github/.github/actions/dioxus-setup@main
 
-            - name: Bundle for desktop
-              run: dx bundle --platform desktop --release
+            - uses: nigeleke/github/.github/actions/dx-bundle@main
+              with:
+                  platform: desktop
 
             - name: Collect desktop bundles
               shell: bash
@@ -65,8 +66,9 @@ jobs:
 
             - uses: nigeleke/github/.github/actions/dioxus-setup@main
 
-            - name: Bundle for web
-              run: dx bundle --platform web --release
+            - uses: nigeleke/github/.github/actions/dx-bundle@main
+              with:
+                  platform: web
 
             - name: Collect web assets
               run: |
@@ -112,8 +114,9 @@ jobs:
                   export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125
                   echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
 
-            - name: Bundle for Android
-              run: dx bundle --platform android --release
+            - uses: nigeleke/github/.github/actions/dx-bundle@main
+              with:
+                  platform: android
 
             - name: Collect APK
               run: |
@@ -141,8 +144,9 @@ jobs:
             - name: Add iOS targets
               run: rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios
 
-            - name: Bundle for iOS
-              run: dx bundle --platform ios --release
+            - uses: nigeleke/github/.github/actions/dx-bundle@main
+              with:
+                  platform: ios
 
             - name: Collect IPA
               run: |
