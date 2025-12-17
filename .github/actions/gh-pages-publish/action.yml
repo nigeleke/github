@@ -1,0 +1,31 @@
+name: Site publish
+description: Upload README, rust docs & llvm-coverage-report to gh-pages
+
+runs:
+    using: composite
+    steps:
+        - name: Coverage report
+          shell: bash
+          run: |
+              cargo llvm-cov --workspace --all-features --html
+
+        - name: Move documentation to temp folder
+          shell: bash
+          run: |
+              mkdir docs0
+              cp README.md docs0/
+              cp -R target/doc docs0
+              cp -R target/llvm-cov docs0
+
+        - name: Update gh-pages
+          shell: bash
+          run: |
+              git config --global user.email "nigeleke@users.noreply.github.com"
+              git config --global user.name "Nigel Eke"
+              export VERSION=$(git describe --abbrev=0 --tags)
+              git checkout gh-pages
+              rm -rf docs
+              mv docs0 docs
+              git add .
+              git commit -m "Release $VERSION"
+              git push

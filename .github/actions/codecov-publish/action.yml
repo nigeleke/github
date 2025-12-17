@@ -1,0 +1,9 @@
+name: Codecov publish
+description: Upload llvm-codecov report to codecov
+
+runs:
+    using: composite
+    steps:
+        - uses: codecov/codecov-action@v5
+          env:
+              CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
