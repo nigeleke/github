@@ -28,7 +28,7 @@ jobs:
 
             - uses: nigeleke/github/.github/actions/dioxus-setup@main
 
-            - uses: nigeleke/github/.github/actions/dx-bundle@main
+            - uses: nigeleke/github/.github/actions/dioxus-bundle@main
               with:
                   platform: desktop
 
@@ -66,7 +66,7 @@ jobs:
 
             - uses: nigeleke/github/.github/actions/dioxus-setup@main
 
-            - uses: nigeleke/github/.github/actions/dx-bundle@main
+            - uses: nigeleke/github/.github/actions/dioxus-bundle@main
               with:
                   platform: web
 
@@ -114,7 +114,7 @@ jobs:
                   export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125
                   echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
 
-            - uses: nigeleke/github/.github/actions/dx-bundle@main
+            - uses: nigeleke/github/.github/actions/dioxus-bundle@main
               with:
                   platform: android
 
@@ -144,7 +144,7 @@ jobs:
             - name: Add iOS targets
               run: rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios
 
-            - uses: nigeleke/github/.github/actions/dx-bundle@main
+            - uses: nigeleke/github/.github/actions/dioxus-bundle@main
               with:
                   platform: ios
 
