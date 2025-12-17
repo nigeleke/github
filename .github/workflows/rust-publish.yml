@@ -11,10 +11,9 @@ permissions:
 jobs:
     publish:
         runs-on: ubuntu-latest
-
         steps:
             - uses: actions/checkout@v6
-            - uses: nigeleke/github/.github/rust-setup@main
+            - uses: nigeleke/github/.github/actions/rust-setup@main
             - uses: nigeleke/github/.github/actions/rust-docs@main
             - uses: nigeleke/github/.github/actions/rust-llvm-cov@main
             - uses: nigeleke/github/.github/actions/codecov-publish@main
