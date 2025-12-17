@@ -2,6 +2,9 @@ name: Publish Docs and Coverage
 
 on:
     workflow_call:
+        secrets:
+            CODECOV_TOKEN:
+                required: false
 
 permissions:
     contents: write
@@ -17,4 +20,6 @@ jobs:
             - uses: nigeleke/github/.github/actions/rust-docs@main
             - uses: nigeleke/github/.github/actions/rust-llvm-cov@main
             - uses: nigeleke/github/.github/actions/codecov-publish@main
+              env:
+                  codecov-token: "${{ secrets.CODECOV_TOKEN }}"
             - uses: nigeleke/github/.github/actions/gh-pages-publish@main

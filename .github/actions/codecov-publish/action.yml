@@ -1,9 +1,14 @@
 name: Codecov publish
 description: Upload llvm-codecov report to codecov
 
+inputs:
+    codecov-token:
+        description: Codecov token
+        required: true
+
 runs:
     using: composite
     steps:
         - uses: codecov/codecov-action@v5
           env:
-              CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+              CODECOV_TOKEN: ${{ codecov-token }}
