@@ -30,10 +30,6 @@ runs:
               git rm -rf docs
               rm -rf docs
               mv docs0 docs
-              ls -al
-              ls -al docs/
-              git status
-
-              # git add .
-              # git commit -m "Release $VERSION" || echo "No changes"
-              # git push origin gh-pages
+              git add docs
+              git commit -m "Release $VERSION" || echo "No changes"
+              git push origin gh-pages
