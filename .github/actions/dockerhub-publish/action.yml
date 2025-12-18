@@ -14,7 +14,8 @@ inputs:
 runs:
     using: composite
     steps:
-        - run: |
+        - shell: bash
+          run: |
               ls .
               ls docker/
 
