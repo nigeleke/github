@@ -1,5 +1,7 @@
-name: Docker publish
-description: Upload llvm-codecov report to codecov
+name: Dockerhub publish
+description: |
+    Upload docker image report to docker hub.
+    Expects docker/Dockerfile.
 
 inputs:
     platforms:
