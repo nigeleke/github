@@ -5,3 +5,7 @@ runs:
     using: composite
     steps:
         - uses: codecov/codecov-action@v5
+        - name: Codecov housekeeping
+          shell: bash
+          run: |
+              rm -f codecov codecov.SHA256SUM codecov.SHA256SUM.sig
