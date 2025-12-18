@@ -16,6 +16,8 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v6
+              with:
+                  fetch-depth: 0
             - uses: nigeleke/github/.github/actions/rust-setup@main
             - uses: nigeleke/github/.github/actions/rust-docs@main
             - uses: nigeleke/github/.github/actions/rust-llvm-cov@main

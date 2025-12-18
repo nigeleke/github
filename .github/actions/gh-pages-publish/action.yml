@@ -25,18 +25,20 @@ runs:
 
               VERSION=$(git describe --abbrev=0 --tags 2>/dev/null || echo "dev")
 
-              git fetch origin gh-pages || true
+              git fetch origin gh-pages
+              ls -al
+              git status
 
-              if git show-ref --quiet refs/heads/gh-pages; then
-                git checkout gh-pages
-              else
-                git checkout --orphan gh-pages
-                git rm -rf .
-              fi
+              # if git show-ref --quiet refs/heads/gh-pages; then
+              #   git checkout gh-pages
+              # else
+              #   git checkout --orphan gh-pages
+              #   git rm -rf .
+              # fi
 
-              rm -rf docs
-              mv docs0 docs
+              # rm -rf docs
+              # mv docs0 docs
 
-              git add .
-              git commit -m "Release $VERSION" || echo "No changes"
-              git push origin gh-pages
+              # git add .
+              # git commit -m "Release $VERSION" || echo "No changes"
+              # git push origin gh-pages
