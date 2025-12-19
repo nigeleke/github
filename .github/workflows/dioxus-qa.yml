@@ -84,16 +84,17 @@ jobs:
 
             - name: Set up Android SDK and NDK
               run: |
-                  wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-                  unzip commandlinetools-linux-11076708_latest.zip -d android-sdk
-                  mv android-sdk/cmdline-tools android-sdk/latest
+                  wget https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip
+                  unzip commandlinetools-linux-13114758_latest.zip
+                  mkdir -p android-sdk/cmdline-tools
+                  mv cmdline-tools android-sdk/cmdline-tools/latest
                   export ANDROID_HOME=$PWD/android-sdk
                   echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-                  yes | $ANDROID_HOME/latest/bin/sdkmanager --licenses
-                  $ANDROID_HOME/latest/bin/sdkmanager \
+                  yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+                  $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
                     "platform-tools" \
-                    "platforms;android-34" \
-                    "build-tools;34.0.0" \
+                    "platforms;android-36" \
+                    "build-tools;36.0.0" \
                     "ndk;26.1.10909125"
                   echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125" >> $GITHUB_ENV
 
