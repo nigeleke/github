@@ -20,7 +20,7 @@ runs:
         - name: Install MacOs Prerequisites
           if: ${{ inputs.os == 'macos-latest' }}
           shell: bash
-          run: echo "TODO"
+          run: brew install openssl@3
 
         - name: Install Ubuntu Prerequisites
           if: ${{ inputs.os == 'ubuntu-latest' }}
