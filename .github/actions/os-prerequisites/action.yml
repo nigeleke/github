@@ -20,7 +20,9 @@ runs:
         - name: Install MacOs Prerequisites
           if: ${{ inputs.os == 'macos-latest' }}
           shell: bash
-          run: brew install openssl@3
+          run: |
+              echo "OPENSSL_DIR=/opt/homebrew/opt/openssl@3" >> $GITHUB_ENV
+              echo "PKG_CONFIG_PATH=/opt/homebrew/opt/openssl@3/lib/pkgconfig" >> $GITHUB_ENV
 
         - name: Install Ubuntu Prerequisites
           if: ${{ inputs.os == 'ubuntu-latest' }}
