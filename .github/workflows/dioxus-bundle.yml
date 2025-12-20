@@ -93,26 +93,7 @@ jobs:
 
             - uses: nigeleke/github/.github/actions/dioxus-setup@main
 
-            - name: Add Android targets
-              run: rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
-
-            - name: Set up Java
-              uses: actions/setup-java@v4
-              with:
-                  distribution: "temurin"
-                  java-version: "17"
-
-            - name: Set up Android SDK and NDK
-              run: |
-                  wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-                  unzip commandlinetools-linux-11076708_latest.zip -d android-sdk
-                  mv android-sdk/cmdline-tools android-sdk/latest
-                  export ANDROID_HOME=$PWD/android-sdk
-                  echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-                  yes | $ANDROID_HOME/latest/bin/sdkmanager --licenses
-                  $ANDROID_HOME/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;26.1.10909125"
-                  export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125
-                  echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+            - uses: nigeleke/github/.github/actions/dioxus-android-setup@main
 
             - uses: nigeleke/github/.github/actions/dioxus-bundle@main
               with:
