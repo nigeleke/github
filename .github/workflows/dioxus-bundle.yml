@@ -103,7 +103,8 @@ jobs:
               run: |
                   mkdir -p artifacts
                   cp target/dx/*/release/android/app/app/build/outputs/bundle/release/*.aab artifacts/
-                  mapfile -t AABS < <(find artifacts -type f -name '*.aab')
+
+                  mapfile -t AABS < <(find target/dx/*/release/android/app/app/build/outputs/bundle/release -type f -name '*.aab')
 
                   if [ "${#AABS[@]}" -ne 1 ]; then
                     echo "Expected exactly one .aab, found ${#AABS[@]}"
@@ -115,10 +116,15 @@ jobs:
                   AAB_BASENAME=$(basename "$AAB")
                   AAB_STEM="${AAB_BASENAME%.aab}"
 
-                  bundletool build-apks \
+                  wget https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar -O bundletool.jar
+
+                  java -jar bundletool.jar build-apks \
                     --bundle="$AAB" \
-                    --output="$AAB_STEM".apks \
+                    --output="$AAB_STEM.apks" \
                     --mode=universal
+
+                  unzip "$AAB_STEM.apks" universal.apk -d artifacts
+                  mv artifacts/universal.apk "artifacts/$AAB_STEM.apk"
 
             - name: Upload artifact
               uses: actions/upload-artifact@v4
