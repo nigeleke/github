@@ -19,6 +19,8 @@ jobs:
               with:
                   fetch-depth: 0
             - uses: nigeleke/github/.github/actions/os-prerequisites@main
+              with:
+                  os: ubuntu-latest
             - uses: nigeleke/github/.github/actions/rust-setup@main
             - uses: nigeleke/github/.github/actions/rust-docs@main
             - uses: nigeleke/github/.github/actions/rust-llvm-cov@main
