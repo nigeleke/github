@@ -154,7 +154,8 @@ jobs:
             - name: Collect IPA
               run: |
                   mkdir -p artifacts
-                  cp dist/bundle/mobile/*.ipa artifacts/ 2>/dev/null || true
+                  ls target/dx/*/release/ios/
+                  cp target/dx/*/release/ios/*.app artifacts/
 
             - name: Upload artifact
               uses: actions/upload-artifact@v4
