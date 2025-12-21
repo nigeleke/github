@@ -155,7 +155,7 @@ jobs:
               run: |
                   mkdir -p artifacts
                   ls target/dx/*/release/ios/
-                  cp target/dx/*/release/ios/*.app artifacts/
+                  cp -R target/dx/*/release/ios/*.app artifacts/
 
             - name: Upload artifact
               uses: actions/upload-artifact@v4
