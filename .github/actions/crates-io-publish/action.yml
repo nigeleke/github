@@ -4,8 +4,10 @@ description: Publish library to crates.io
 runs:
     using: composite
     steps:
-        - uses: actions/checkout@v4
-        - shell: bash
-          run: cargo publish --all-features
-          env:
-              CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        - uses: actions/checkout@v6
+        - name: Build Release & publish crate
+          shell: bash
+          run: |
+              cargo build --release --all-features
+              cargo doc --release --all-features
+              cargo publish --all-features
