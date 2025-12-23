@@ -1,0 +1,11 @@
+name: Crates.io Publish
+description: Publish library to crates.io
+
+runs:
+    using: composite
+    steps:
+        - uses: actions/checkout@v4
+        - shell: bash
+          run: cargo publish --all-features
+          env:
+              CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
