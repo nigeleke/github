@@ -1,0 +1,102 @@
+name: Build & Release
+
+on:
+    push:
+        tags:
+            - "v*.*.*"
+
+inputs:
+    packages:
+        description: "Comma-separated list of Cargo packages to build (workspace members). If empty, builds default crate."
+        required: false
+        default: ""
+    targets:
+        description: "Comma-separated list of targets"
+        required: true
+    use-cross:
+        description: "Use cross instead of cargo"
+        required: false
+        default: "true"
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                target:
+                    [
+                        x86_64-unknown-linux-gnu,
+                        x86_64-pc-windows-gnu,
+                        x86_64-apple-darwin,
+                    ]
+        steps:
+            - uses: actions/checkout@v6
+
+            - uses: nigeleke/github/.github/actions/os-prerequisites@main
+              with:
+                  os: ubuntu-latest
+
+            - uses: nigeleke/github/.github/actions/rust-setup@main
+
+            - name: Install cross
+              run: cargo install cross
+
+            - name: Build binaries
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  BUILDER="cargo"
+                  if [[ "${{ inputs.use-cross }}" == "true" ]]; then
+                    BUILDER="cross"
+                  fi
+
+                  IFS=',' read -ra TARGETS <<< "${{ inputs.targets }}"
+                  IFS=',' read -ra PACKAGES <<< "${{ inputs.packages }}"
+
+                  for target in "${TARGETS[@]}"; do
+                    if [[ -z "${{ inputs.packages }}" ]]; then
+                      echo "Building default package for target $target"
+                      $BUILDER build --release --target "$target"
+                    else
+                      for pkg in "${PACKAGES[@]}"; do
+                        echo "Building package $pkg for target $target"
+                        $BUILDER build --release --target "$target" --package "$pkg"
+                      done
+                    fi
+                  done
+
+            - name: Upload binaries
+              uses: actions/upload-artifact@v6
+              with:
+                  name: binaries-${{ matrix.target }}
+                  path: |
+                      target/${{ matrix.target }}/release/*
+                      !target/${{ matrix.target }}/release/*.d
+                      !target/${{ matrix.target }}/release/*.rlib
+                      !target/${{ matrix.target }}/release/*.a
+
+    release:
+        needs: build
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+
+            - uses: actions/download-artifact@v3
+              with:
+                  path: ./binaries
+
+            - name: Create GitHub Release
+              uses: softprops/action-gh-release@v1
+              with:
+                  tag_name: ${{ github.ref_name }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Upload Release Assets
+              uses: softprops/action-gh-release@v1
+              with:
+                  files: |
+                      ./binaries/linux/*
+                      ./binaries/windows/*
+                      ./binaries/macos/*
