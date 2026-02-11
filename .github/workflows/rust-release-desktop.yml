@@ -39,14 +39,20 @@ jobs:
               run: |
                   set -euxo pipefail
 
-                  echo "Building for target: ${{ matrix.target }}"
-                  echo "Packages: '${{ inputs.packages }}'"
-
                   IFS=',' read -ra PACKAGES <<< "${{ inputs.packages }}"
 
                   if [[ -z "${{ inputs.packages }}" || ${#PACKAGES[@]} -eq 0 ]]; then
-                    echo "Building default crate"
                     cargo build --release --target "${{ matrix.target }}"
+                    RELEASE_DIR="target/${{ matrix.target }}/release"
+                    BIN_PATH=$(find "$RELEASE_DIR" -maxdepth 1 -type f -executable ! -name "*.dylib" ! -name "*.so" ! -name "*.dll" | head -n 1)
+
+                    if [[ -n "$BIN_PATH" ]]; then
+                      BIN_NAME=$(basename "$BIN_PATH")
+                      NEW_NAME="${BIN_NAME}-${{ matrix.os }}${{ matrix.os == 'windows-latest' && '.exe' || '' }}"
+                      cp "$BIN_PATH" "$NEW_NAME"
+                    else
+                      echo "Warning: No executable found in $RELEASE_DIR"
+                    fi
                   else
                     for pkg in "${PACKAGES[@]}"; do
                       echo "Building package: $pkg"
@@ -54,10 +60,30 @@ jobs:
                         --release \
                         --target "${{ matrix.target }}" \
                         --package "$pkg"
+
+                      RELEASE_DIR="target/${{ matrix.target }}/release"
+                      BIN_NAME="$pkg"
+                      BIN_PATH="$RELEASE_DIR/$BIN_NAME"
+
+                      if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+                        BIN_PATH="$RELEASE_DIR/$BIN_NAME.exe"
+                      fi
+
+                      if [[ -f "$BIN_PATH" ]]; then
+                        NEW_NAME="${BIN_NAME}-${{ matrix.os }}${{ matrix.os == 'windows-latest' && '.exe' || '' }}"
+                        cp "$BIN_PATH" "$NEW_NAME"
+                      else
+                        BIN_PATH=$(find "$RELEASE_DIR" -maxdepth 1 -type f -executable ! -name "*.dylib" ! -name "*.so" ! -name "*.dll" | head -n 1)
+                        if [[ -n "$BIN_PATH" ]]; then
+                          BIN_NAME=$(basename "$BIN_PATH" .exe)
+                          NEW_NAME="${BIN_NAME}-${{ matrix.os }}${{ matrix.os == 'windows-latest' && '.exe' || '' }}"
+                          cp "$BIN_PATH" "$NEW_NAME"
+                        else
+                          echo "Warning: No executable found for package $pkg in $RELEASE_DIR"
+                        fi
+                      fi
                     done
                   fi
-
-                  ls -lah "target/${{ matrix.target }}/release" || true
 
             - name: Upload binaries
               uses: actions/upload-artifact@v6
