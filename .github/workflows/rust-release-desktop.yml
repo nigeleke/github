@@ -4,33 +4,35 @@ on:
     workflow_call:
         inputs:
             packages:
-                description: "Comma-separated list of Cargo packages to build (workspace members). If empty, builds default crate."
+                description: "Comma-separated list of Cargo packages to build (workspace members). If empty, builds the default crate"
                 required: false
                 type: string
                 default: ""
 
 jobs:
-    strategy:
-        matrix:
-            include:
-                - os: ubuntu-latest
-                  target: x86_64-unknown-linux-gnu
-
-                - os: windows-latest
-                  target: x86_64-pc-windows-msvc
-
-                - os: macos-latest
-                  target: x86_64-apple-darwin
     build:
-        runs-on: ${{matrix.os}}
+        name: Build ${{ matrix.target }}
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                include:
+                    - os: ubuntu-latest
+                      target: x86_64-unknown-linux-gnu
+                    - os: windows-latest
+                      target: x86_64-pc-windows-msvc
+                    - os: macos-latest
+                      target: x86_64-apple-darwin
+
         steps:
             - uses: actions/checkout@v6
 
-            - uses: nigeleke/github/.github/actions/os-prerequisites@main
+            - name: Install OS prerequisites
+              uses: nigeleke/github/.github/actions/os-prerequisites@main
               with:
-                  os: ${{matrix.os}}
+                  os: ${{ matrix.os }}
 
-            - uses: nigeleke/github/.github/actions/rust-setup@main
+            - name: Set up Rust
+              uses: nigeleke/github/.github/actions/rust-setup@main
 
             - name: Build binaries
               shell: bash
@@ -39,11 +41,10 @@ jobs:
 
                   echo "Building for target: ${{ matrix.target }}"
                   echo "Packages: '${{ inputs.packages }}'"
-                  echo "Use cross: '${{ inputs.use-cross }}'"
 
                   IFS=',' read -ra PACKAGES <<< "${{ inputs.packages }}"
 
-                  if [[ -z "${{ inputs.packages }}" ]]; then
+                  if [[ -z "${{ inputs.packages }}" || ${#PACKAGES[@]} -eq 0 ]]; then
                     echo "Building default crate"
                     cargo build --release --target "${{ matrix.target }}"
                   else
@@ -56,7 +57,6 @@ jobs:
                     done
                   fi
 
-                  echo "=== Release dir contents ==="
                   ls -lah "target/${{ matrix.target }}/release" || true
 
             - name: Upload binaries
@@ -68,22 +68,36 @@ jobs:
                       !target/${{ matrix.target }}/release/*.d
                       !target/${{ matrix.target }}/release/*.rlib
                       !target/${{ matrix.target }}/release/*.a
+                      !target/${{ matrix.target }}/release/build/**
+                      !target/${{ matrix.target }}/release/deps/**
+                  if-no-files-found: error
+                  retention-days: 1
 
-        release:
-            needs: build
-            runs-on: ubuntu-latest
-            steps:
-                - uses: actions/checkout@v6
+    release:
+        name: Create GitHub Release
+        needs: build
+        runs-on: ubuntu-latest
+        if: startsWith(github.ref, 'refs/tags/')
 
-                - uses: actions/download-artifact@v7
-                  with:
-                      path: ./binaries
+        steps:
+            - uses: actions/checkout@v6
 
-                - name: Create GitHub Release
-                  uses: softprops/action-gh-release@v1
-                  with:
-                      tag_name: ${{ github.ref_name }}
-                      files: |
-                          binaries/**/*
-                  env:
-                      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Download all platform binaries
+              uses: actions/download-artifact@v7
+              with:
+                  path: binaries/
+                  pattern: binaries-*
+                  merge-multiple: true
+
+            - name: List downloaded files (debug)
+              run: ls -R binaries/
+
+            - name: Create or update GitHub Release
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: ${{ github.ref_name }}
+                  name: Release ${{ github.ref_name }}
+                  generate_release_notes: true
+                  files: binaries/**/*
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
