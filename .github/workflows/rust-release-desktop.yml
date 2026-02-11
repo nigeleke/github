@@ -1,22 +1,22 @@
 name: Build & Release
 
 on:
-    push:
-        tags:
-            - "v*.*.*"
-
-inputs:
-    packages:
-        description: "Comma-separated list of Cargo packages to build (workspace members). If empty, builds default crate."
-        required: false
-        default: ""
-    targets:
-        description: "Comma-separated list of targets"
-        required: true
-    use-cross:
-        description: "Use cross instead of cargo"
-        required: false
-        default: "true"
+    workflow_call:
+        inputs:
+            packages:
+                description: "Comma-separated list of Cargo packages to build (workspace members). If empty, builds default crate."
+                required: false
+                default: ""
+            targets:
+                description: "Comma-separated list of targets"
+                required: true
+            use-cross:
+                description: "Use cross instead of cargo"
+                required: false
+                default: "true"
+            secrets:
+                GITHUB_TOKEN:
+                    required: true
 
 jobs:
     build:
@@ -90,13 +90,7 @@ jobs:
               uses: softprops/action-gh-release@v1
               with:
                   tag_name: ${{ github.ref_name }}
+                  files: |
+                      binaries/**/*
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Upload Release Assets
-              uses: softprops/action-gh-release@v1
-              with:
-                  files: |
-                      ./binaries/linux/*
-                      ./binaries/windows/*
-                      ./binaries/macos/*
