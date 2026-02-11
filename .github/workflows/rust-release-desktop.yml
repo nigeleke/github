@@ -8,34 +8,29 @@ on:
                 required: false
                 type: string
                 default: ""
-            use-cross:
-                description: "Use cross instead of cargo"
-                required: false
-                type: boolean
-                default: true
 
 jobs:
+    strategy:
+        matrix:
+            include:
+                - os: ubuntu-latest
+                  target: x86_64-unknown-linux-gnu
+
+                - os: windows-latest
+                  target: x86_64-pc-windows-msvc
+
+                - os: macos-latest
+                  target: x86_64-apple-darwin
     build:
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                target:
-                    [
-                        x86_64-unknown-linux-gnu,
-                        x86_64-pc-windows-gnu,
-                        x86_64-apple-darwin,
-                    ]
+        runs-on: ${{matrix.os}}
         steps:
             - uses: actions/checkout@v6
 
             - uses: nigeleke/github/.github/actions/os-prerequisites@main
               with:
-                  os: ubuntu-latest
+                  os: ${{matrix.os}}
 
             - uses: nigeleke/github/.github/actions/rust-setup@main
-
-            - name: Install cross
-              run: cargo install cross
 
             - name: Build binaries
               shell: bash
@@ -46,20 +41,15 @@ jobs:
                   echo "Packages: '${{ inputs.packages }}'"
                   echo "Use cross: '${{ inputs.use-cross }}'"
 
-                  BUILDER="cargo"
-                  if [[ ${{ inputs.use-cross }} == true ]]; then
-                    BUILDER="cross"
-                  fi
-
                   IFS=',' read -ra PACKAGES <<< "${{ inputs.packages }}"
 
                   if [[ -z "${{ inputs.packages }}" ]]; then
                     echo "Building default crate"
-                    $BUILDER build --release --target "${{ matrix.target }}"
+                    cargo build --release --target "${{ matrix.target }}"
                   else
                     for pkg in "${PACKAGES[@]}"; do
                       echo "Building package: $pkg"
-                      $BUILDER build \
+                      cargo build \
                         --release \
                         --target "${{ matrix.target }}" \
                         --package "$pkg"
@@ -79,21 +69,21 @@ jobs:
                       !target/${{ matrix.target }}/release/*.rlib
                       !target/${{ matrix.target }}/release/*.a
 
-    release:
-        needs: build
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v6
+        release:
+            needs: build
+            runs-on: ubuntu-latest
+            steps:
+                - uses: actions/checkout@v6
 
-            - uses: actions/download-artifact@v7
-              with:
-                  path: ./binaries
+                - uses: actions/download-artifact@v7
+                  with:
+                      path: ./binaries
 
-            - name: Create GitHub Release
-              uses: softprops/action-gh-release@v1
-              with:
-                  tag_name: ${{ github.ref_name }}
-                  files: |
-                      binaries/**/*
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                - name: Create GitHub Release
+                  uses: softprops/action-gh-release@v1
+                  with:
+                      tag_name: ${{ github.ref_name }}
+                      files: |
+                          binaries/**/*
+                  env:
+                      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
