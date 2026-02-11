@@ -6,13 +6,12 @@ on:
             packages:
                 description: "Comma-separated list of Cargo packages to build (workspace members). If empty, builds default crate."
                 required: false
+                type: string
                 default: ""
-            targets:
-                description: "Comma-separated list of targets"
-                required: true
             use-cross:
                 description: "Use cross instead of cargo"
                 required: false
+                type: boolean
                 default: "true"
             secrets:
                 GITHUB_TOKEN:
