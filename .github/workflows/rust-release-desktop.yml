@@ -40,27 +40,34 @@ jobs:
             - name: Build binaries
               shell: bash
               run: |
-                  set -euo pipefail
+                  set -euxo pipefail
+
+                  echo "Building for target: ${{ matrix.target }}"
+                  echo "Packages: '${{ inputs.packages }}'"
+                  echo "Use cross: '${{ inputs.use-cross }}'"
 
                   BUILDER="cargo"
-                  if [[ "${{ inputs.use-cross }}" == true ]]; then
+                  if [[ ${{ inputs.use-cross }} == true ]]; then
                     BUILDER="cross"
                   fi
 
-                  IFS=',' read -ra TARGETS <<< "${{ inputs.targets }}"
                   IFS=',' read -ra PACKAGES <<< "${{ inputs.packages }}"
 
-                  for target in "${TARGETS[@]}"; do
-                    if [[ -z "${{ inputs.packages }}" ]]; then
-                      echo "Building default package for target $target"
-                      $BUILDER build --release --target "$target"
-                    else
-                      for pkg in "${PACKAGES[@]}"; do
-                        echo "Building package $pkg for target $target"
-                        $BUILDER build --release --target "$target" --package "$pkg"
-                      done
-                    fi
-                  done
+                  if [[ -z "${{ inputs.packages }}" ]]; then
+                    echo "Building default crate"
+                    $BUILDER build --release --target "${{ matrix.target }}"
+                  else
+                    for pkg in "${PACKAGES[@]}"; do
+                      echo "Building package: $pkg"
+                      $BUILDER build \
+                        --release \
+                        --target "${{ matrix.target }}" \
+                        --package "$pkg"
+                    done
+                  fi
+
+                  echo "=== Release dir contents ==="
+                  ls -lah "target/${{ matrix.target }}/release" || true
 
             - name: Upload binaries
               uses: actions/upload-artifact@v6
