@@ -41,46 +41,68 @@ jobs:
 
                   IFS=',' read -ra PACKAGES <<< "${{ inputs.packages }}"
 
+                  SUFFIX=""
+                  if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+                    SUFFIX="linux-latest"
+                  elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+                    SUFFIX="macos-latest"
+                  elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+                    SUFFIX="windows-latest"
+                  fi
+
                   if [[ -z "${{ inputs.packages }}" || ${#PACKAGES[@]} -eq 0 ]]; then
                     cargo build --release --target "${{ matrix.target }}"
                     RELEASE_DIR="target/${{ matrix.target }}/release"
-                    BIN_PATH=$(find "$RELEASE_DIR" -maxdepth 1 -type f -executable ! -name "*.dylib" ! -name "*.so" ! -name "*.dll" | head -n 1)
+                    BIN_PATH=$(find "$RELEASE_DIR" -maxdepth 1 -type f -executable \
+                      ! -name "*.dylib" ! -name "*.so" ! -name "*.dll" ! -name "*.pdb" \
+                      ! -name "build" ! -name "deps" ! -name "native" 2>/dev/null | head -n 1)
 
                     if [[ -n "$BIN_PATH" ]]; then
-                      BIN_NAME=$(basename "$BIN_PATH")
-                      NEW_NAME="${BIN_NAME}-${{ matrix.os }}${{ matrix.os == 'windows-latest' && '.exe' || '' }}"
+                      BIN_NAME=$(basename "$BIN_PATH" .exe)
+                      NEW_NAME="${BIN_NAME}-${SUFFIX}"
+                      if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+                        NEW_NAME="${NEW_NAME}.exe"
+                      fi
                       cp "$BIN_PATH" "$NEW_NAME"
+
+                      PDB_PATH="$RELEASE_DIR/${BIN_NAME}.pdb"
+                      if [[ -f "$PDB_PATH" ]]; then
+                        cp "$PDB_PATH" "${BIN_NAME}-${SUFFIX}.pdb"
+                      fi
                     else
-                      echo "Warning: No executable found in $RELEASE_DIR"
+                      echo "Warning: No main executable found in $RELEASE_DIR"
                     fi
+
                   else
                     for pkg in "${PACKAGES[@]}"; do
-                      echo "Building package: $pkg"
-                      cargo build \
-                        --release \
-                        --target "${{ matrix.target }}" \
-                        --package "$pkg"
-
+                      cargo build --release --target "${{ matrix.target }}" --package "$pkg"
                       RELEASE_DIR="target/${{ matrix.target }}/release"
                       BIN_NAME="$pkg"
                       BIN_PATH="$RELEASE_DIR/$BIN_NAME"
-
                       if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
                         BIN_PATH="$RELEASE_DIR/$BIN_NAME.exe"
                       fi
 
-                      if [[ -f "$BIN_PATH" ]]; then
-                        NEW_NAME="${BIN_NAME}-${{ matrix.os }}${{ matrix.os == 'windows-latest' && '.exe' || '' }}"
-                        cp "$BIN_PATH" "$NEW_NAME"
-                      else
-                        BIN_PATH=$(find "$RELEASE_DIR" -maxdepth 1 -type f -executable ! -name "*.dylib" ! -name "*.so" ! -name "*.dll" | head -n 1)
-                        if [[ -n "$BIN_PATH" ]]; then
-                          BIN_NAME=$(basename "$BIN_PATH" .exe)
-                          NEW_NAME="${BIN_NAME}-${{ matrix.os }}${{ matrix.os == 'windows-latest' && '.exe' || '' }}"
-                          cp "$BIN_PATH" "$NEW_NAME"
-                        else
-                          echo "Warning: No executable found for package $pkg in $RELEASE_DIR"
+                      if [[ ! -f "$BIN_PATH" ]]; then
+                        BIN_PATH=$(find "$RELEASE_DIR" -maxdepth 1 -type f -executable \
+                          ! -name "*.dylib" ! -name "*.so" ! -name "*.dll" ! -name "*.pdb" \
+                          | head -n 1)
+                      fi
+
+                      if [[ -n "$BIN_PATH" && -f "$BIN_PATH" ]]; then
+                        BIN_NAME=$(basename "$BIN_PATH" .exe)
+                        NEW_NAME="${BIN_NAME}-${SUFFIX}"
+                        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+                          NEW_NAME="${NEW_NAME}.exe"
                         fi
+                        cp "$BIN_PATH" "$NEW_NAME"
+
+                        PDB_PATH="$RELEASE_DIR/${BIN_NAME}.pdb"
+                        if [[ -f "$PDB_PATH" ]]; then
+                          cp "$PDB_PATH" "${BIN_NAME}-${SUFFIX}.pdb"
+                        fi
+                      else
+                        echo "Warning: No executable found for package $pkg in $RELEASE_DIR"
                       fi
                     done
                   fi
