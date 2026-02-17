@@ -1,0 +1,127 @@
+name: cargo-verify-version-vs-tag
+
+description: "Verifies that the git tag matches the version in Cargo.toml"
+
+inputs:
+    cargo-toml-path:
+        description: "Path to the main Cargo.toml (usually root)"
+        required: false
+        default: "Cargo.toml"
+    allow-workspace-mismatch:
+        description: "Allow workspace members to have different versions (only root checked)"
+        required: false
+        default: "false"
+    strict-parsing:
+        description: "Fail if version contains build metadata or pre-release tag unless tag has it too"
+        required: false
+        default: "true"
+
+runs:
+    using: composite
+    steps:
+        - name: Extract version from git tag
+          id: get_tag
+          shell: bash
+          run: |
+              TAG="${{ github.ref_name }}"
+              VERSION="${TAG#v}"
+              VERSION="${VERSION#release-}"
+              VERSION="${VERSION#Release-}"
+              echo "tag_version=${VERSION}" >> "$GITHUB_OUTPUT"
+              echo "Raw tag      : $TAG"
+              echo "Cleaned tag  : $VERSION"
+
+        - name: Verify Cargo.toml version(s) against tag
+          shell: bash
+          env:
+              TAG_VER: ${{ steps.get_tag.outputs.tag_version }}
+              MAIN_TOML: ${{ inputs.cargo-toml-path }}
+              STRICT_WORKSPACE: ${{ inputs.allow-workspace-mismatch }}
+          run: |
+              set -euo pipefail
+
+              extract_version() {
+                local toml="$1"
+                local ver
+
+                ver=$(grep -m 1 '^version\s*=' "$toml" | cut -d'"' -f2 || true)
+                if [[ -z "$ver" ]]; then
+                  ver=$(sed -n 's/^[[:space:]]*version[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' "$toml" | head -n 1)
+                fi
+                echo "$ver"
+              }
+
+              compare_versions() {
+                local file="$1"
+                local found="$2"
+
+                if [[ "$found" == "$TAG_VER" ]]; then
+                  return 0
+                fi
+
+                if [[ "${{ inputs.strict-parsing }}" != "true" ]]; then
+                  local tag_base="${TAG_VER%%+*}"
+                  tag_base="${tag_base%%-*}"
+                  local found_base="${found%%+*}"
+                  found_base="${found_base%%-*}"
+                  if [[ "$tag_base" == "$found_base" ]]; then
+                    echo "⚠️  $file matches after ignoring pre-release/build metadata"
+                    return 0
+                  fi
+                fi
+
+                echo "::error::Version mismatch in $file"
+                echo "  Expected (tag): $TAG_VER"
+                echo "  Found         : $found"
+                return 1
+              }
+
+              echo "Checking main Cargo.toml"
+              MAIN_VER=$(extract_version "$MAIN_TOML")
+
+              if [[ -z "$MAIN_VER" ]]; then
+                echo "::error::Could not find version= in $MAIN_TOML"
+                echo "Last 15 lines:"
+                tail -n 15 "$MAIN_TOML"
+                exit 1
+              fi
+
+              if ! compare_versions "$MAIN_TOML" "$MAIN_VER"; then
+                exit 1
+              fi
+              echo "✅ Main Cargo.toml: $MAIN_VER"
+
+              if [[ "$STRICT_WORKSPACE" == "false" ]]; then
+                echo "Strict workspace mode: checking all other Cargo.toml files"
+
+                mapfile -t OTHER_TOMLS < <(find . -name Cargo.toml -type f \
+                  ! -path '*/target/*' \
+                  ! -path '*/.git/*' \
+                  ! -path "./$MAIN_TOML" \
+                  2>/dev/null || true)
+
+                for toml in "${OTHER_TOMLS[@]}"; do
+                  if grep -qE 'version\s*=\s*(\{\s*)?workspace\s*=\s*true' "$toml"; then
+                    echo "✅ $toml (uses workspace version inheritance)"
+                    continue
+                  fi
+
+                  MEMBER_VER=$(extract_version "$toml")
+                  if [[ -z "$MEMBER_VER" ]]; then
+                    echo "::error::Could not find version= in $toml"
+                    echo "File does not use workspace inheritance either."
+                    echo "Last 10 lines:"
+                    tail -n 10 "$toml"
+                    exit 1
+                  fi
+
+                  if ! compare_versions "$toml" "$MEMBER_VER"; then
+                    exit 1
+                  fi
+                  echo "✅ $toml : $MEMBER_VER"
+                done
+
+                echo "✅ All workspace Cargo.toml files match the tag"
+              else
+                echo "root Cargo.toml checked"
+              fi
