@@ -21,30 +21,10 @@ jobs:
             - uses: nigeleke/github/.github/actions/os-prerequisites@main
               with:
                   os: ubuntu-latest
-            - shell: bash
-              run: |
-                  echo "****POST os-pre"
-                  git status
             - uses: nigeleke/github/.github/actions/rust-setup@main
-            - shell: bash
-              run: |
-                  echo "****POST rust setup"
-                  git status
             - uses: nigeleke/github/.github/actions/rust-docs@main
-            - shell: bash
-              run: |
-                  echo "****POST rust docs"
-                  git status
             - uses: nigeleke/github/.github/actions/rust-llvm-cov@main
-            - shell: bash
-              run: |
-                  echo "****POST rust llvm cov"
-                  git status
             - uses: nigeleke/github/.github/actions/codecov-publish@main
               env:
                   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
             - uses: nigeleke/github/.github/actions/gh-pages-publish@main
-            - shell: bash
-              run: |
-                  echo "****POST gh-pages"
-                  git status

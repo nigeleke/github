@@ -7,9 +7,5 @@ runs:
         - name: Check docs
           shell: bash
           run: |
-              echo "***RUST DOCS MAIN pre"
-              git status
               cargo doc --workspace --no-deps --all-features
-              echo "***RUST DOCS MAIN post"
-              git status
               git diff
