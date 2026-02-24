@@ -2,6 +2,15 @@ name: Publish Docs and Coverage
 
 on:
     workflow_call:
+        inputs:
+            matrix:
+                description: >
+                    JSON array for strategy.matrix.include.
+                    Each object must contain "cargo-extra-args".
+                    Default = single job with --all-features.
+                required: false
+                type: string
+                default: '[{"cargo-extra-args": "--all-features"}]'
         secrets:
             CODECOV_TOKEN:
                 required: true
@@ -23,8 +32,14 @@ jobs:
                   os: ubuntu-latest
             - uses: nigeleke/github/.github/actions/rust-setup@main
             - uses: nigeleke/github/.github/actions/rust-docs@main
+              with:
+                  cargo-extra-args: ${{ matrix.cargo-extra-args }}
             - uses: nigeleke/github/.github/actions/rust-llvm-cov@main
+              with:
+                  cargo-extra-args: ${{ matrix.cargo-extra-args }}
             - uses: nigeleke/github/.github/actions/codecov-publish@main
               env:
                   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
             - uses: nigeleke/github/.github/actions/gh-pages-publish@main
+              with:
+                  cargo-extra-args: ${{ matrix.cargo-extra-args }}

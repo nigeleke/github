@@ -2,6 +2,15 @@ name: Publish crate
 
 on:
     workflow_call:
+        inputs:
+            matrix:
+                description: >
+                    JSON array for strategy.matrix.include.
+                    Each object must contain "cargo-extra-args".
+                    Default = single job with --all-features.
+                required: false
+                type: string
+                default: '[{"cargo-extra-args": "--all-features"}]'
         secrets:
             CARGO_REGISTRY_TOKEN:
                 required: true
@@ -18,3 +27,5 @@ jobs:
             - uses: nigeleke/github/.github/actions/crates-io-publish@main
               env:
                   CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+              with:
+                  cargo-extra-args: ${{ matrix.cargo-extra-args }}

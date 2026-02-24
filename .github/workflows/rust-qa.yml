@@ -13,6 +13,14 @@ on:
                 required: false
                 type: string
                 default: "{}"
+            matrix:
+                description: >
+                    JSON array for strategy.matrix.include.
+                    Each object must contain "cargo-extra-args".
+                    Default = single job with --all-features.
+                required: false
+                type: string
+                default: '[{"cargo-extra-args": "--all-features"}]'
 
 jobs:
     qa:
@@ -29,3 +37,5 @@ jobs:
                   toolchain: ${{ inputs.toolchain }}
 
             - uses: nigeleke/github/.github/actions/rust-qa@main
+              with:
+                  cargo-extra-args: ${{ matrix.cargo-extra-args }}

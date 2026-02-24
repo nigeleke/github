@@ -1,5 +1,5 @@
-name: "Rust Docs Check"
-description: "Build Rust documentation to ensure it compiles"
+name: "Rust Test"
+description: "Run cargo test"
 
 inputs:
     cargo-extra-args:
@@ -10,8 +10,6 @@ inputs:
 runs:
     using: "composite"
     steps:
-        - name: Check docs
+        - name: Test
           shell: bash
-          run: |
-              cargo doc --workspace --no-deps ${{ inputs.cargo-extra-args }}
-              git diff
+          run: cargo test --workspace --all-targets ${{ inputs.cargo-extra-args }}

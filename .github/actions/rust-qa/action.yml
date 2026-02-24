@@ -1,12 +1,26 @@
 name: "Rust QA"
 description: "Run QA checks against rust code"
 
+inputs:
+    cargo-extra-args:
+        description: "Passed through to test/clippy/coverage/docs"
+        required: false
+        default: "--all-features"
+
 runs:
     using: "composite"
     steps:
-        - uses: nigeleke/github/.github/actions/rust-test-all-features@main
+        - uses: nigeleke/github/.github/actions/rust-test@main
+          with:
+              cargo-extra-args: ${{ inputs.cargo-extra-args }}
         - uses: nigeleke/github/.github/actions/rust-llvm-cov@main
+          with:
+              cargo-extra-args: ${{ inputs.cargo-extra-args }}
         - uses: nigeleke/github/.github/actions/rust-clippy@main
+          with:
+              cargo-extra-args: ${{ inputs.cargo-extra-args }}
         - uses: nigeleke/github/.github/actions/rust-fmt@main
         - uses: nigeleke/github/.github/actions/rust-docs@main
+          with:
+              cargo-extra-args: ${{ inputs.cargo-extra-args }}
         - uses: nigeleke/github/.github/actions/rust-audit@main

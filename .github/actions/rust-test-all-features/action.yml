@@ -1,9 +1,0 @@
-name: "Rust Test (All Features)"
-description: "Run cargo test across all features"
-
-runs:
-    using: "composite"
-    steps:
-        - name: Test all features
-          shell: bash
-          run: cargo test --workspace --all-targets --all-features
