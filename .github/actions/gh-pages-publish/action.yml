@@ -22,6 +22,7 @@ runs:
               cp README.md docs0/
               cp -R target/doc docs0
               cp -R target/llvm-cov docs0
+              touch docs0/.nojekyll
 
         - name: Update gh-pages
           shell: bash
