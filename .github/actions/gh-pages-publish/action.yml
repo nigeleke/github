@@ -19,8 +19,15 @@ runs:
           shell: bash
           run: |
               mkdir docs0
-              touch docs0/.nojekyll
+              cat <<EOF >> _config.yml
+              remote_theme: jekyll/minima
+              plugins:
+                - jekyll-remote-theme
+              minima:
+                skin: auto
+              EOF
               ls -la          # ← ADD THIS: shows what's actually in the current directory
+              cat _config.yml
               if [ -f README.md ]; then
                   cp README.md docs0/
               else
