@@ -15,42 +15,102 @@ runs:
           with:
               fetch-depth: 0
 
-        - name: Move documentation to temp folder
-          shell: bash
-          run: |
-              mkdir docs0
-              cat <<EOF >> _config.yml
-              remote_theme: jekyll/minima
-              plugins:
-                - jekyll-remote-theme
-              minima:
-                skin: auto
-              EOF
-              ls -la          # ← ADD THIS: shows what's actually in the current directory
-              cat _config.yml
-              if [ -f README.md ]; then
-                  cp README.md docs0/
-              else
-                  echo "README.md NOT FOUND in $(pwd)"
-                  ls -la          # show again for proof
-              fi
-              [ -d docs ] && cp -R docs docs0/ || true
-              [ -d target/doc ] && cp -R target/doc docs0/ || true
-              [ -d target/llvm-cov ] && cp -R target/llvm-cov docs0/ || true
+name: Site publish
+description: Build and upload README, rust docs & llvm-coverage-report to GitHub Pages
 
-        - name: Update gh-pages
-          shell: bash
-          run: |
-              git config --global user.email "nigeleke@users.noreply.github.com"
-              git config --global user.name "Nigel Eke"
+inputs:
+  cargo-extra-args:
+    description: "Extra cargo args (e.g. --all-features, --features foo,bar, or empty string)"
+    required: false
+    default: "--all-features"
 
-              VERSION=$(git describe --abbrev=0 --tags 2>/dev/null || echo "dev")
+runs:
+  using: composite
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v6
 
-              git fetch origin gh-pages
-              git checkout gh-pages
-              git rm -rf docs
-              rm -rf docs
-              mv docs0 docs
-              git add docs
-              git commit -m "Release $VERSION" || echo "No changes"
-              git push origin gh-pages
+    - name: Prepare site directory
+      shell: bash
+      run: |
+        set -e
+        mkdir -p site/_layouts
+        mkdir -p site/assets/css
+        if [ -f README.md ]; then
+          cp README.md site/index.md
+        fi
+        [ -d docs ] && cp -R docs/* site/ || true
+        [ -d target/doc ] && cp -R target/doc site/doc || true
+        [ -d target/llvm-cov ] && cp -R target/llvm-cov site/coverage || true
+
+        REPO_NAME="${GITHUB_REPOSITORY##*/}"
+        cat > site/_config.yml << 'EOF'
+        title: ${REPO_NAME}
+        markdown: kramdown
+        theme: null
+        EOF
+
+        cat > site/_layouts/default.html << 'EOF'
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>{{ page.title | default: site.title }}</title>
+          <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+        </head>
+        <body>
+          <main class="content">
+            {{ content }}
+          </main>
+        </body>
+        </html>
+        EOF
+
+        # Light/Dark CSS
+        cat > site/assets/css/style.scss << 'EOF'
+        ---
+        ---
+
+        :root {
+          --bg: #ffffff;
+          --text: #111111;
+          --link: #0366d6;
+        }
+
+        @media (prefers-color-scheme: dark) {
+          :root {
+            --bg: #0d1117;
+            --text: #c9d1d9;
+            --link: #58a6ff;
+          }
+        }
+
+        body {
+          margin: 2rem auto;
+          max-width: 900px;
+          padding: 1rem;
+          background: var(--bg);
+          color: var(--text);
+          font-family: system-ui, -apple-system, sans-serif;
+          line-height: 1.6;
+        }
+
+        a { color: var(--link); }
+
+        pre, code {
+          background: rgba(127,127,127,0.1);
+          padding: 0.2em 0.4em;
+          border-radius: 6px;
+        }
+
+        pre {
+          padding: 1rem;
+          overflow-x: auto;
+        }
+        EOF
+
+    - name: Upload Pages artifact
+      uses: actions/upload-pages-artifact@v4
+      with:
+        path: site
