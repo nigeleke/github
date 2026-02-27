@@ -10,20 +10,15 @@ inputs:
 runs:
     using: composite
     steps:
-        - name: Coverage report
-          shell: bash
-          run: |
-              cargo llvm-cov --workspace ${{ inputs.cargo-extra-args }} --html
-
         - name: Move documentation to temp folder
           shell: bash
           run: |
               mkdir docs0
               touch docs0/.nojekyll
               cp README.md docs0/
-              [ -d doc ] && cp -R target/doc docs0
               [ -d docs ] && cp -R docs docs0/
-              cp -R target/llvm-cov docs0
+              [ -d target/doc ] && cp -R target/doc docs0
+              [ -d target/llvm-cov ] && cp -R target/llvm-cov docs0
 
         - name: Update gh-pages
           shell: bash
