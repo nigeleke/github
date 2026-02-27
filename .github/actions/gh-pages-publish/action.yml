@@ -20,12 +20,16 @@ runs:
           run: |
               mkdir docs0
               touch docs0/.nojekyll
+              ls -la          # ← ADD THIS: shows what's actually in the current directory
               if [ -f README.md ]; then
                   cp README.md docs0/
+              else
+                  echo "README.md NOT FOUND in $(pwd)"
+                  ls -la          # show again for proof
               fi
-              [ -d docs ] && cp -R docs docs0/
-              [ -d target/doc ] && cp -R target/doc docs0
-              [ -d target/llvm-cov ] && cp -R target/llvm-cov docs0
+              [ -d docs ] && cp -R docs docs0/ || true
+              [ -d target/doc ] && cp -R target/doc docs0/ || true
+              [ -d target/llvm-cov ] && cp -R target/llvm-cov docs0/ || true
 
         - name: Update gh-pages
           shell: bash
