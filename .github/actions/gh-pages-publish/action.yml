@@ -91,7 +91,7 @@ runs:
               EOF
 
         - name: Build with Jekyll
-          uses: [actions/jekyll-build-pages@v1]
+          uses: actions/jekyll-build-pages@v1
           with:
               source: ./site
               destination: ./_site
