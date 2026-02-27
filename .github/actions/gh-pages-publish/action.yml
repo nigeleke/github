@@ -52,9 +52,6 @@ runs:
 
               # Light/Dark CSS
               cat > site/assets/css/style.scss << 'EOF'
-              ---
-              ---
-
               :root {
                 --bg: #ffffff;
                 --text: #111111;
@@ -93,10 +90,16 @@ runs:
               }
               EOF
 
+        - name: Build with Jekyll
+          uses: [actions/jekyll-build-pages@v1]
+          with:
+              source: ./site
+              destination: ./_site
+
         - name: Upload Pages artifact
           uses: actions/upload-pages-artifact@v4
           with:
-              path: site
+              path: ./_site
 
         - name: Deploy
           id: deployment
