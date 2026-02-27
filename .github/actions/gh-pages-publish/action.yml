@@ -19,12 +19,11 @@ runs:
           shell: bash
           run: |
               mkdir docs0
+              touch docs0/.nojekyll
               cp README.md docs0/
-              cp -R target/doc docs0
-              cp -R target/llvm-cov docs0
+              [ -d doc ] && cp -R target/doc docs0
               [ -d docs ] && cp -R docs docs0/
-              mkdir docs0/docs/
-              touch docs0/docs/.nojekyll
+              cp -R target/llvm-cov docs0
 
         - name: Update gh-pages
           shell: bash
