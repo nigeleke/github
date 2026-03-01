@@ -47,12 +47,12 @@ runs:
                   <header>
                     <a class="title" href="https://nigeleke.github.io/">niGel eKe - personal site</a>
                     <nav id="menu-nav"}>
-                      <a href="https://nigeleke.github.io>home</a>
-                      <a href="https://nigeleke.github.io/italian>italian</a>
-                      <a href="https://nigeleke.github.io/projects>projects</a>
-                      <a href="https://nigeleke.github.io/reference>reference</a>
-                      <a href="https://nigeleke.github.io/apis>apis</a>
-                      <a href="https://nigeleke.github.io/useful_info>useful info</a>
+                      <a href="https://nigeleke.github.io/">home</a>
+                      <a href="https://nigeleke.github.io/italian">italian</a>
+                      <a href="https://nigeleke.github.io/projects">projects</a>
+                      <a href="https://nigeleke.github.io/reference">reference</a>
+                      <a href="https://nigeleke.github.io/apis">apis</a>
+                      <a href="https://nigeleke.github.io/useful_info">useful info</a>
                     </nav>
                   </header>
                   <section>
