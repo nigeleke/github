@@ -39,55 +39,35 @@ runs:
               <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>{{ page.title | default: site.title }}</title>
-                <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+                <title>niGel eKe - personal site</title>
+                <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
+                <link rel="stylesheet" href="{{ '/assets/css/title.css' | relative_url }}">
+                <link rel="stylesheet" href="{{ '/assets/css/menu.css' | relative_url }}">
+                <link rel="stylesheet" href="{{ '/assets/css/external_link.css' | relative_url }}">
               </head>
               <body>
-                <main class="content">
-                  {{ content }}
+                <main>
+                  <header>
+                    <a class="title" href="https://nigeleke.github.io/">niGel eKe - personal site</a>
+                    <nav id="menu-nav"}>
+                      <a href="https://nigeleke.github.io>home</a>
+                      <a href="https://nigeleke.github.io/italian>italian</a>
+                      <a href="https://nigeleke.github.io/projects>projects</a>
+                      <a href="https://nigeleke.github.io/reference>reference</a>
+                      <a href="https://nigeleke.github.io/apis>apis</a>
+                      <a href="https://nigeleke.github.io/useful_info>useful info</a>
+                    </nav>
+                  </header>
+                  <section>
+                    {{ content }}
+                  </section>
+                  <footer>
+                    <span>Copyright © 2025-2026; Nigel Eke. All rights reserved.</span>
+                    <span>Made with <a class="external-link" href="https://dioxuslabs.com/" target="_blank">Dioxus</a></span>
+                  </footer>
                 </main>
               </body>
               </html>
-              EOF
-
-              # Light/Dark CSS
-              cat > site/assets/css/style.scss << 'EOF'
-              :root {
-                --bg: #ffffff;
-                --text: #111111;
-                --link: #0366d6;
-              }
-
-              @media (prefers-color-scheme: dark) {
-                :root {
-                  --bg: #0d1117;
-                  --text: #c9d1d9;
-                  --link: #58a6ff;
-                }
-              }
-
-              body {
-                margin: 2rem auto;
-                max-width: 900px;
-                padding: 1rem;
-                background: var(--bg);
-                color: var(--text);
-                font-family: system-ui, -apple-system, sans-serif;
-                line-height: 1.6;
-              }
-
-              a { color: var(--link); }
-
-              pre, code {
-                background: rgba(127,127,127,0.1);
-                padding: 0.2em 0.4em;
-                border-radius: 6px;
-              }
-
-              pre {
-                padding: 1rem;
-                overflow-x: auto;
-              }
               EOF
 
         - name: Build with Jekyll
