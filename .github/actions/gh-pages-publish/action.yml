@@ -67,7 +67,7 @@ runs:
               </html>
               EOF
 
-              cat > site/assets/css/style.scss << 'EOF'
+              cat > site/assets/css/style.css << 'EOF'
               :root {
                   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
                   --border-colour: #546f82;
