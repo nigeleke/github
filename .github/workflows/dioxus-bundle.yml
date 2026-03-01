@@ -49,7 +49,7 @@ jobs:
                   fi
 
             - name: Upload artifact
-              uses: actions/upload-artifact@v6
+              uses: actions/upload-artifact@v7
               with:
                   name: desktop-${{ runner.os }}
                   path: artifacts/
@@ -76,7 +76,7 @@ jobs:
                   zip -r artifacts/web-bundle.zip target/dx/*/release/web/public
 
             - name: Upload artifact
-              uses: actions/upload-artifact@v6
+              uses: actions/upload-artifact@v7
               with:
                   name: web-bundle
                   path: artifacts/
@@ -127,7 +127,7 @@ jobs:
                   mv artifacts/universal.apk "artifacts/$AAB_STEM.apk"
 
             - name: Upload artifact
-              uses: actions/upload-artifact@v6
+              uses: actions/upload-artifact@v7
               with:
                   name: android-bundle
                   path: artifacts/
@@ -158,7 +158,7 @@ jobs:
                   cp -R target/dx/*/release/ios/*.app artifacts/
 
             - name: Upload artifact
-              uses: actions/upload-artifact@v6
+              uses: actions/upload-artifact@v7
               with:
                   name: ios-bundle
                   path: artifacts/
