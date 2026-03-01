@@ -39,28 +39,19 @@ runs:
               <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>niGel eKe - personal site</title>
+                <title>niGel eKe - project site</title>
                 <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
               </head>
               <body>
                 <main>
                   <header>
-                    <a class="title" href="https://nigeleke.github.io/">niGel eKe - personal site</a>
-                    <nav id="menu-nav"}>
-                      <a href="https://nigeleke.github.io/">home</a>
-                      <a href="https://nigeleke.github.io/italian">italian</a>
-                      <a href="https://nigeleke.github.io/projects">projects</a>
-                      <a href="https://nigeleke.github.io/reference">reference</a>
-                      <a href="https://nigeleke.github.io/apis">apis</a>
-                      <a href="https://nigeleke.github.io/useful_info">useful info</a>
-                    </nav>
+                    <a class="title" href="https://nigeleke.github.io/">niGel eKe - project site</a>
                   </header>
                   <section>
                     {{ content }}
                   </section>
                   <footer>
                     <span>Copyright © 2025-2026; Nigel Eke. All rights reserved.</span>
-                    <span>Made with <a class="external-link" href="https://dioxuslabs.com/" target="_blank">Dioxus</a></span>
                   </footer>
                 </main>
               </body>
@@ -216,52 +207,8 @@ runs:
                   gap: 10px;
               }
 
-              @media (max-width: 768px) {
-                  .menu-button {
-                      display: block;
-                      anchor-name: --menu-button;
-                  }
-                  nav {
-                      flex-direction: column;
-                      gap: 15px;
-                      position: absolute;
-                      position-anchor: --menu-button;
-                      inset: auto;
-                      top: anchor(bottom);
-                      right: anchor(right);
-                      margin-block-start: 5px;
-                      padding: 20px;
-                      display: none;
-                      opacity: 0;
-                      transition:
-                          display 250ms,
-                          opacity 250ms;
-                      transition-behavior: allow-discrete;
-                  }
-                  nav:popover-open {
-                      display: flex;
-                      opacity: 1;
-                      @starting-style {
-                          display: flex;
-                          opacity: 0;
-                      }
-                  }
-              }
-
-              @media (min-width: 769px) {
-                  .menu-button {
-                      display: none;
-                  }
-              }
-
               .title {
                   font-size: xx-large;
-              }
-
-              @media (max-width: 768px) {
-                  .title {
-                      font-size: x-large;
-                  }
               }
 
               .external-link::after {
