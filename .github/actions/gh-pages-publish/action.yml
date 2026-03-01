@@ -40,10 +40,7 @@ runs:
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>niGel eKe - personal site</title>
-                <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
-                <link rel="stylesheet" href="{{ '/assets/css/title.css' | relative_url }}">
-                <link rel="stylesheet" href="{{ '/assets/css/menu.css' | relative_url }}">
-                <link rel="stylesheet" href="{{ '/assets/css/external_link.css' | relative_url }}">
+                <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
               </head>
               <body>
                 <main>
@@ -68,6 +65,211 @@ runs:
                 </main>
               </body>
               </html>
+              EOF
+
+              cat > site/assets/css/style.scss << 'EOF'
+              :root {
+                  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                  --border-colour: #546f82;
+                  --border-colour-highlight: hsl(from var(--border-colour) h s 60%);
+                  --border-text-colour: #f8f8ff;
+              }
+
+              @media (prefers-color-scheme: light) {
+                  :root {
+                      --background-colour: #f8f8ff;
+                      --text-colour: #616161;
+                      --image-background-highlight: hsl(
+                          from var(--background-colour) h s 97%
+                      );
+                  }
+              }
+
+              @media (prefers-color-scheme: dark) {
+                  :root {
+                      --background-colour: #4a4a4a;
+                      --text-colour: var(--border-text-colour);
+                      --image-background-highlight: hsl(
+                          from var(--background-colour) h s 60%
+                      );
+                  }
+              }
+
+              html,
+              body {
+                  background-color: var(--background-colour);
+                  color: var(--text-colour);
+                  margin: 0px;
+                  padding: 0px;
+              }
+
+              main {
+                  height: 100svh;
+                  display: grid;
+                  grid-template-rows: auto 1fr auto;
+              }
+
+              header,
+              footer {
+                  background-color: var(--border-colour);
+                  color: var(--border-text-colour);
+                  padding: 20px;
+              }
+
+              header a,
+              footer a {
+                  color: var(--border-text-colour);
+              }
+
+              header a:hover,
+              footer a:hover {
+                  background-color: var(--border-colour-highlight);
+              }
+
+              header {
+                  display: flex;
+                  justify-content: space-between;
+              }
+
+              main > section {
+                  padding-top: 20px;
+                  padding-bottom: 10px;
+                  width: 60%;
+                  justify-self: center;
+                  display: grid;
+                  justify-content: stretch;
+                  align-content: start;
+                  overflow-y: auto;
+              }
+
+              footer {
+                  font-size: smaller;
+                  display: flex;
+                  justify-content: space-between;
+              }
+
+              h1 {
+                  font-size: x-large;
+              }
+
+              h2 {
+                  font-size: larger;
+                  font-style: italic;
+              }
+
+              a {
+                  text-decoration: none;
+                  color: var(--text-colour);
+              }
+
+              a:hover {
+                  background-color: var(--border-colour-highlight);
+                  color: var(--border-text-colour);
+              }
+
+              table {
+                  width: 98%;
+                  border-collapse: collapse;
+              }
+
+              tr:first-child {
+                  border-top: var(--border-colour-highlight) 1px solid;
+              }
+
+              tr:last-child {
+                  border-bottom: var(--border-colour-highlight) 1px solid;
+              }
+
+              th:first-child,
+              td:first-child {
+                  border-left: var(--border-colour-highlight) 1px solid;
+              }
+
+              th,
+              td {
+                  border-right: var(--border-colour-highlight) 1px solid;
+                  padding-left: 5px;
+                  padding-right: 5px;
+              }
+
+              th {
+                  text-align: left;
+              }
+
+              img {
+                  background-color: var(--image-background-highlight);
+                  padding: 10px;
+                  border-radius: 10px;
+              }
+
+              .menu-button {
+                  background-color: var(--border-colour);
+                  border: none;
+              }
+              .menu-icon {
+                  height: 16px;
+              }
+
+              nav {
+                  background-color: var(--border-colour);
+                  display: flex;
+                  gap: 10px;
+              }
+
+              @media (max-width: 768px) {
+                  .menu-button {
+                      display: block;
+                      anchor-name: --menu-button;
+                  }
+                  nav {
+                      flex-direction: column;
+                      gap: 15px;
+                      position: absolute;
+                      position-anchor: --menu-button;
+                      inset: auto;
+                      top: anchor(bottom);
+                      right: anchor(right);
+                      margin-block-start: 5px;
+                      padding: 20px;
+                      display: none;
+                      opacity: 0;
+                      transition:
+                          display 250ms,
+                          opacity 250ms;
+                      transition-behavior: allow-discrete;
+                  }
+                  nav:popover-open {
+                      display: flex;
+                      opacity: 1;
+                      @starting-style {
+                          display: flex;
+                          opacity: 0;
+                      }
+                  }
+              }
+
+              @media (min-width: 769px) {
+                  .menu-button {
+                      display: none;
+                  }
+              }
+
+              .title {
+                  font-size: xx-large;
+              }
+
+              @media (max-width: 768px) {
+                  .title {
+                      font-size: x-large;
+                  }
+              }
+
+              .external-link::after {
+                  content: " 🔗";
+                  font-size: 0.8em;
+                  margin-left: 5px;
+                  color: inherit;
+              }
               EOF
 
         - name: Build with Jekyll
