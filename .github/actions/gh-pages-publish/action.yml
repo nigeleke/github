@@ -219,6 +219,12 @@ runs:
               }
               EOF
 
+              echo "ls site"
+              ls -al site
+              echo ""
+              echo "ls site/app/"
+              ls -al site/app/
+
               if [[ -f ".github/nigeleke/gh-pages-publish.sh" ]]; then
                 echo "Found .github/nigeleke/gh-pages-publish.sh — executing"
                 bash .github/nigeleke/gh-pages-publish.sh
