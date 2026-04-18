@@ -222,8 +222,6 @@ runs:
               echo "ls site"
               ls -al site
               echo ""
-              echo "ls site/app/"
-              ls -al site/app/
 
               if [[ -f ".github/nigeleke/gh-pages-publish.sh" ]]; then
                 echo "Found .github/nigeleke/gh-pages-publish.sh — executing"
@@ -231,6 +229,10 @@ runs:
               else
                 echo "No custom .github/nigeleke/gh-pages-publish.sh found — skipping"
               fi
+
+              echo ""
+              echo "ls site/app/"
+              ls -al site/app/
 
         - name: Build with Jekyll
           uses: actions/jekyll-build-pages@v1
