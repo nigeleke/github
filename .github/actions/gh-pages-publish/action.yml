@@ -225,6 +225,18 @@ runs:
               source: ./site
               destination: ./_site
 
+        - name: Run custom publish steps
+          shell: bash
+          run: |
+              set -euo pipefail
+
+              if [[ -f ".github/nigeleke/gh-pages-publish.sh" ]]; then
+                echo "Found .github/nigeleke/gh-pages-publish.sh — executing"
+                bash .github/nigeleke/gh-pages-publish.sh
+              else
+                echo "No custom .github/nigeleke/gh-pages-publish.sh found — skipping"
+              fi
+
         - name: Upload Pages artifact
           uses: actions/upload-pages-artifact@v4
           with:
