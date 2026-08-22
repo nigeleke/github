@@ -17,5 +17,5 @@ runs:
         - name: Install Dioxus
           shell: bash
           run: |
-              cargo install cargo-binstall
+              cargo install cargo-binstall --locked
               cargo binstall dioxus-cli
